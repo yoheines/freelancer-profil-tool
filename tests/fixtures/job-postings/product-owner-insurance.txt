@@ -1,0 +1,50 @@
+Projektanfrage: Digital Product Owner (m/w/d) – Online-Kundenportal Versicherung
+
+Für einen namhaften Kunden aus der Versicherungsbranche suchen wir einen erfahrenen Product Owner zur strategischen und operativen Weiterentwicklung des Online-Kundenportals mit starkem Fokus auf Customer Experience, Digitalisierung und skalierbare Self-Service-Funktionen.
+
+Ziel des Projekts:
+Ziel ist die fachliche und technische Weiterentwicklung des bestehenden Kundenportals – inklusive klarer Produkt-Roadmap, KPI-basierter Steuerung und enger Abstimmung mit Fachbereich, IT und Vorstand. Du gestaltest die digitale Kundenerfahrung aktiv mit und treibst die Self-Service-Strategie voran.
+
+Aufgaben & Verantwortlichkeiten:
+
+1. Analyse & Konzeption
+- Aufnahme und Strukturierung fachlicher Anforderungen aus verschiedenen Fachbereichen (Vertrieb, Service, Produktmanagement)
+- Analyse des bestehenden Portals sowie der zugrunde liegenden Prozesse
+- Identifikation von Optimierungspotenzialen (Usability, Digitalisierungsgrad, Prozesseffizienz)
+- Entwicklung einer Produkt-Roadmap und eines Zielbilds für die Weiterentwicklung
+
+2. Steuerung & Product Ownership
+- Fachliche Steuerung der Portal-Weiterentwicklung im agilen Kontext
+- Übersetzung von Anforderungen in User Stories und Entwicklungsaufgaben
+- Backlog-Management und Priorisierung mit relevanten Stakeholdern
+- Sicherstellung eines konsistenten und zielgerichteten Product Backlogs
+
+3. Performance & Qualität
+- Aufbau und Weiterentwicklung eines KPI- und Reporting-Frameworks für das Portal
+- Definition von Erfolgskennzahlen entlang der Customer Journey
+- Durchführung und Bewertung von Tests (inkl. A/B-Testing, Usability-Tests)
+- Qualitätssicherung entlang agiler Entwicklungszyklen
+
+4. Agile Zusammenarbeit & Stakeholder-Management
+- Moderation agiler Formate (Sprint Planning, Reviews, Retrospektiven)
+- Enge Zusammenarbeit mit cross-funktionalen Teams (UX, IT, Marketing, Kundenservice)
+- Reporting und Abstimmung auf Vorstandsebene
+- Sicherstellung von Wissenstransfer und nachhaltiger Dokumentation
+
+Anforderungen:
+- Mehrjährige Erfahrung als Product Owner / Digital Product Manager im Online-Umfeld
+- Fundierte Kenntnisse im Portal-Management, digitalen Kundenprozessen und Self-Service
+- Erfahrung im Aufbau von Produktstrategien, Roadmaps und Zielbildern
+- Sicherer Umgang mit agilen Methoden (Scrum, Kanban) und Backlog-Steuerung (JIRA, Confluence)
+- Kenntnisse in Web-Analytics, KPI-Systemen und Conversion-Optimierung
+- Erfahrung mit CMS-Systemen und Portal-Technologien
+- Ausgeprägtes analytisches Denkvermögen und strukturierte Arbeitsweise
+- Erfahrung in regulierten Umfeldern (Versicherung, Finanzen) von Vorteil
+- Idealerweise Kenntnisse im Bereich Conversational AI / Chatbot-Integration für die Service-Automatisierung
+
+Rahmenbedingungen:
+- Start: kurzfristig / nächstmöglich
+- Laufzeit: 6–12 Monate mit Option auf Verlängerung
+- Einsatzort: überwiegend Remote, punktuell vor Ort im Raum Frankfurt für Workshops
+- Sprache: Deutsch (fließend), Englisch (C1)
+- Vertragsart: Freelance / projektbasiert

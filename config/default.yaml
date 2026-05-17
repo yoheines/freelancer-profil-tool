@@ -1,0 +1,19 @@
+# Default application configuration
+# Non-sensitive settings for the freelancer-profil-tool
+
+workspace:
+  runsDir: "./runs"
+  sourcesDir: "./sources"
+
+pipeline:
+  projectSelection:
+    targetCount: 5
+  keywordSelection:
+    targetCount: 10
+
+llm:
+  provider: "openai-compatible"
+  baseURL: "https://crof.ai/v1"
+  model: "kimi-k2.6-precision"
+  maxTokens: 262144
+  temperature: 0

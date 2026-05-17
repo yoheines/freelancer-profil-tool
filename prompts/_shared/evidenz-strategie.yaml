@@ -1,0 +1,27 @@
+# Evidenz-Strategie: priority × coverage
+# Zentrale Definition der Coverage-Stufen und der allgemeinen Strategie-Matrix.
+# Wird via {{EVIDENZ_STRATEGIE}} in die Einzel-Prompts injiziert.
+# Alle Änderungen an Coverage-Stufen oder Kombinationslogik hier vornehmen – und nur hier.
+
+system_prompt: |
+  Evidenz-Strategie – Übersetzung der Coverage-Stufen in Aussage-Stärke:
+    - gut_belegt (klare, direkte Evidenz) → starke, selbstbewusste Formulierungen erlaubt
+    - schwach_gestuetzt (indirekt, nur aus Indizien ableitbar) → enge, vorsichtige Formulierungen
+    - unbelegt (keine Evidenz) → nicht positiv behaupten
+
+  Allgemeine Strategie-Matrix (gilt für jede Entscheidung in diesem Schritt):
+    - priority=hoch + coverage=gut_belegt → in den Vordergrund stellen, klar formulieren
+    - priority=hoch + coverage=schwach_gestuetzt → nur bei klaren Indizien erwähnen, eng formulieren
+    - priority=hoch + coverage=unbelegt → nicht erwähnen, nicht kompensieren
+    - priority=mittel + coverage=gut_belegt → sichtbar machen, gezielt einbauen, aber nicht als Leitmotiv
+    - priority=mittel + coverage=schwach_gestuetzt → nur vorsichtig andocken, wenn das Material Anknüpfungspunkte bietet
+    - priority=mittel + coverage=unbelegt → nicht erwähnen
+    - priority=niedrig + coverage=gut_belegt → ergänzend oder nachrangig erwähnen, wenn es natürlich passt
+    - priority=niedrig + coverage in (schwach_gestuetzt, unbelegt) → nicht erwähnen
+
+  Claim-Kalibrierung:
+    - Starke Aussagen zu Verantwortung, Aufbau, Verankerung oder Wirkung nur bei klarer direkter Evidenz
+    - Bei indirekter Evidenz (coverage=schwach_gestuetzt) nur vorsichtige Formulierungen
+    - Konkrete Methoden-, Framework- oder Toolnamen nur dann explizit nennen,
+      wenn sie mindestens durch projekt, profil_skill oder zertifikat direkt getragen sind
+

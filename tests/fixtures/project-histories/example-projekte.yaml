@@ -1,0 +1,168 @@
+projects:
+  - id: "proj-portal-relaunch"
+    title: "Relaunch Online-Kundenportal"
+    client: "Versicherungskonzern GmbH"
+    industry: "Versicherung"
+    description: >
+      Product Ownership und fachliche Projektleitung für den Relaunch des
+      Online-Kundenportals. Aufnahme und Priorisierung von Anforderungen aus
+      Fachbereich, Kundenservice und Vertrieb. Steuerung der agilen Entwicklung
+      in Scrum mit 3 cross-funktionalen Teams. Aufbau eines KPI-Reporting-
+      Frameworks zur Messung von Nutzerzufriedenheit, Self-Service-Quote und
+      Prozesseffizienz. Einführung von A/B-Testing zur Optimierung der
+      Customer Journey. Migration des bestehenden CMS auf ein neues System.
+      Go-Live nach 8 Monaten – Steigerung der Self-Service-Quote um 35 %.
+    skills:
+      - "Scrum"
+      - "Kundenportal"
+      - "A/B-Testing"
+      - "CMS"
+      - "KPI-Systeme"
+      - "Stakeholder-Management"
+    duration: "01/2022–09/2022"
+
+  - id: "proj-selfservice-strategie"
+    title: "Self-Service-Strategie & Produkt-Roadmap"
+    client: "Finanzdienstleister AG"
+    industry: "Finanzen"
+    description: >
+      Entwicklung einer ganzheitlichen Self-Service-Strategie für das
+      Online-Kundenportal. Analyse des Ist-Zustands, Benchmarking mit
+      Wettbewerbern, Identifikation von Quick Wins und strategischen
+      Hebeln. Erstellung einer priorisierten Produkt-Roadmap über 18 Monate.
+      Ableitung von Epics und User Stories für die ersten drei Entwicklungssprints.
+      Abstimmung der Roadmap mit Vorstand, Fachbereich und IT.
+      Begleitung der initialen Umsetzungsphase als Product Owner.
+    skills:
+      - "Produktstrategie"
+      - "Roadmapping"
+      - "Self-Service"
+      - "User Stories"
+      - "Stakeholder-Management"
+    duration: "03/2023–07/2023"
+
+  - id: "proj-kpi-framework"
+    title: "Aufbau KPI- & Reporting-Framework Kundenportal"
+    client: "Finanzdienstleister AG"
+    industry: "Finanzen"
+    description: >
+      Konzeption und Einführung eines umfassenden KPI- und Reporting-Frameworks
+      für das Online-Kundenportal. Definition von Erfolgskennzahlen entlang der
+      Customer Journey (Akquisition, Aktivierung, Nutzung, Bindung).
+      Implementierung von Web-Analytics-Tracking (Google Analytics, Contentsquare)
+      und Aufbau eines automatisierten Dashboard-Reportings für Fachbereich und
+      Management. Schulung der Fachteams im Umgang mit Daten und Ableitung von
+      Optimierungsmaßnahmen. Grundlage für datengetriebene Priorisierung der
+      Produkt-Roadmap.
+    skills:
+      - "Web-Analytics"
+      - "KPI-Systeme"
+      - "Google Analytics"
+      - "Dashboard"
+      - "Customer Journey"
+    duration: "10/2022–02/2023"
+
+  - id: "proj-agile-transformation"
+    title: "Agile Transformation IT-Abteilung"
+    client: "Beratungshaus AG"
+    industry: "Beratung"
+    description: >
+      Begleitung einer agilen Transformation in einer IT-Abteilung mit 40
+      Mitarbeitern. Einführung von Scrum und Kanban in drei Entwicklungsteams.
+      Coaching von Product Ownern und Scrum Mastern. Aufsetzen von
+      Sprint-Planung, Daily Stand-ups, Reviews und Retrospektiven.
+      Etablierung eines Portfoliomanagement-Prozesses zur Priorisierung
+      abteilungsübergreifender Themen. Einführung von JIRA und Confluence
+      als zentrale Kollaborationsplattform. Nach 6 Monaten erste messbare
+      Verbesserung der Liefergeschwindigkeit um 25 %.
+    skills:
+      - "Scrum"
+      - "Kanban"
+      - "Agile Coaching"
+      - "JIRA"
+      - "Confluence"
+      - "Portfoliomanagement"
+    duration: "03/2016–09/2016"
+
+  - id: "proj-cms-migration"
+    title: "CMS-Migration & Portal-Neuentwicklung"
+    client: "Versicherungskonzern GmbH"
+    industry: "Versicherung"
+    description: >
+      Fachliche Projektleitung für die Migration von 12 Webauftritten von einem
+      Legacy-CMS auf Adobe Experience Manager. Anforderungserhebung mit den
+      Fachbereichen, Konzeption der Content-Modelle und Vorlagen.
+      Steuerung der Umsetzung mit einem externen Dienstleister (Nearshoring,
+      10 Entwickler). Aufbau einer Quality-Gate-Prozesses inkl.
+      Abnahmekriterien und Go-Live-Management. Migration von über 5.000
+      Content-Seiten mit einer Ausfallzeit von unter 2 Stunden.
+    skills:
+      - "CMS"
+      - "Adobe Experience Manager"
+      - "Migration"
+      - "Vendor Management"
+      - "Nearshoring"
+    duration: "01/2017–12/2017"
+
+  - id: "proj-onboarding-plattform"
+    title: "Digitales Kunden-Onboarding"
+    client: "Finanzdienstleister AG"
+    industry: "Finanzen"
+    description: >
+      Product Ownership für die Neuentwicklung eines digitalen Kunden-Onboarding-
+      Prozesses (Video-Ident, E-Signatur, Kontoeinrichtung). Übersetzung
+      regulatorischer Anforderungen (GWG, AML, KYC) in fachliche Konzepte
+      und User Stories. Enge Zusammenarbeit mit Rechtsabteilung, Compliance
+      und Geldwäschebeauftragtem. Steuerung der agilen Entwicklung mit
+      einem internen Team und zwei externen Dienstleistern. Erfolgreicher
+      Go-Live nach 5 Monaten – Reduzierung der Onboarding-Zeit von 3 Tagen
+      auf 12 Minuten.
+    skills:
+      - "Product Ownership"
+      - "Regulierte Umfelder"
+      - "Compliance"
+      - "User Stories"
+      - "Stakeholder-Management"
+      - "Vendor Management"
+    duration: "06/2019–11/2019"
+
+  - id: "proj-usability-optimierung"
+    title: "UX-/Usability-Optimierung Kundenportal"
+    client: "Finanzdienstleister AG"
+    industry: "Finanzen"
+    description: >
+      Leitung eines UX-Optimierungsprogramms für das bestehende Kundenportal.
+      Durchführung von Nutzerinterviews und Usability-Tests mit 30 Probanden.
+      Ableitung und Priorisierung von Optimierungsmaßnahmen auf Basis
+      datengetriebener Erkenntnisse (Heatmaps, Session Recordings, Funnel-Analyse).
+      Steuerung der Umsetzung im agilen Zwei-Wochen-Rhythmus. Nach 6 Monaten
+      Steigerung des Customer Satisfaction Score (CSAT) um 20 % und Reduzierung
+      der Abbruchrate im Antragsprozess um 15 %.
+    skills:
+      - "UX / Usability"
+      - "Customer Journey"
+      - "Conversion-Optimierung"
+      - "Web-Analytics"
+      - "Scrum"
+    duration: "01/2020–07/2020"
+
+  - id: "proj-claim-management"
+    title: "Digitalisierung Schadenmanagement"
+    client: "Versicherungskonzern GmbH"
+    industry: "Versicherung"
+    description: >
+      Fachliche Konzeption und Steuerung der Digitalisierung des
+      Schadenmanagement-Prozesses. Analyse des Ist-Prozesses über mehrere
+      Abteilungen hinweg. Erstellung eines Soll-Konzepts inklusive
+      Self-Service-Schadenmeldung für Kunden und automatisierter
+      Prüfungsroutinen. Anforderungserhebung und Priorisierung mit den
+      Fachbereichen Schaden, Betrugsprävention und IT. Begleitung der
+      agilen Entwicklung als Product Owner. Erste Ausbaustufe nach 4 Monaten
+      live – 30 % der Schadenmeldungen über den neuen Self-Service-Kanal.
+    skills:
+      - "Product Ownership"
+      - "Prozessmodellierung"
+      - "Self-Service"
+      - "Requirements Engineering"
+      - "Stakeholder-Management"
+    duration: "06/2021–03/2022"

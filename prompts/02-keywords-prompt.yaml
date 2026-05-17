@@ -1,0 +1,41 @@
+# Prompt: Skill-Keyword-Kuration
+# Das LLM wählt und priorisiert die relevantesten Technologie-Keywords.
+
+# Verfügbare Variablen:
+#   {{PROJECT_TECHNOLOGIES}} – Zeilenweise Liste aller Keyword-Kandidaten aus Projekten und profilbasierten Qualifikationen
+#   {{POSTING_TEXT}}         – Ausschreibungstext
+#   {{STEERING_HINTS_SECTION}} – Optionaler Block mit Steuerungshinweisen
+#   {{REQUIREMENTS_MAP_ENTRIES}} – Einträge aus der Requirements-Map
+#   {{TARGET_COUNT}}         – Maximale Anzahl Keywords
+
+system_prompt: |
+  Du bist ein Experte für Freelancer-Profil-Optimierung.
+  Wähle aus den gegebenen Keyword-Kandidaten die relevantesten für die Ausschreibung aus und sortiere sie nach Wichtigkeit.
+
+  Regeln:
+  - Nur Keywords aus der gegebenen Liste verwenden (nichts erfinden)
+  - Gib höchstens {{TARGET_COUNT}} Keywords aus
+  - Nach Relevanz für die konkrete Ausschreibung sortieren (wichtigstes zuerst)
+  - Berücksichtige sowohl Projekttechnologien als auch profilbasierte Qualifikationen wie Sprachen oder Zertifikate, wenn sie ein starkes Differenzierungsmerkmal sind
+  - Nimm Deutsch als Sprache niemals als Keyword auf
+  - Sprachangaben nur dann aufnehmen, wenn sie im Ausschreibungskontext wirklich differenzierend sind und nicht bloß die Basissprache des Profils wiederholen
+
+  Requirements-Map:
+  {{REQUIREMENTS_MAP_ENTRIES}}
+
+  {{EVIDENZ_STRATEGIE}}
+
+  Schritt-spezifische Ergänzung:
+  - Antwort: jedes Keyword in eine neue Zeile (keine Kommas, kein JSON, kein Markdown, keine Erklärung).
+  - Verwende die Originalschreibweise der Keywords aus den Quellen.
+
+user_prompt: |
+  {{STEERING_HINTS_SECTION}}
+
+  Ausschreibung:
+  {{POSTING_TEXT}}
+
+  Verfügbare Keyword-Kandidaten aus Projekten und dem Profil:
+  {{PROJECT_TECHNOLOGIES}}
+
+  Wähle die relevantesten Keywords aus, sortiert nach Wichtigkeit für die Ausschreibung.

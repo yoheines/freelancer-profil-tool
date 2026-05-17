@@ -1,0 +1,90 @@
+name: "Alex Beispiel"
+email: "alex@beispiel.example"
+phone: "+49 123 456 789 0"
+location: "Frankfurt am Main"
+title: "Senior IT-Projektmanager & Digital Product Owner"
+
+availability: "ab sofort"
+capacity: "bis zu 100%"
+onsiteWillingness: "bis zu 60%"
+
+summary: >
+  Senior IT-Projektmanager und Digital Product Owner mit 15+ Jahren Erfahrung
+  in der Konzeption und Steuerung digitaler Kundenportale und Self-Service-Plattformen
+  im Versicherungs- und Finanzumfeld. Langjährige Führungsverantwortung für agile Teams
+  bis 15 Mitarbeiter, Budgetverantwortung für Projekte bis 15 Mio. €.
+  Sicher in der Abstimmung mit Fachbereich, IT und Vorstandsebene,
+  erfahren in regulierten Umfeldern und agilen Arbeitsmethoden.
+
+skills:
+  - name: "Produktmanagement"
+  - name: "Product Ownership"
+  - name: "Projektmanagement"
+  - name: "Agile Methoden"
+  - name: "Scrum"
+  - name: "Kanban"
+  - name: "Roadmapping"
+  - name: "Backlog-Management"
+  - name: "User Stories"
+  - name: "Requirements Engineering"
+  - name: "Business Analysis"
+  - name: "Stakeholder-Management"
+  - name: "Führung"
+  - name: "Digitale Plattformen"
+  - name: "Kundenportal"
+  - name: "Self-Service"
+  - name: "Customer Journey"
+  - name: "Conversion-Optimierung"
+  - name: "Web-Analytics"
+  - name: "KPI-Systeme"
+  - name: "CMS"
+  - name: "JIRA"
+  - name: "Confluence"
+  - name: "A/B-Testing"
+  - name: "Prozessmodellierung"
+  - name: "UX / Usability"
+  - name: "Vendor Management"
+  - name: "Regulierte Umfelder (Versicherung)"
+
+certifications:
+  - "Professional Scrum Product Owner (PSPO II)"
+  - "Professional Scrum Master (PSM I)"
+  - "IREB Certified Professional for Requirements Engineering (CPRE) Foundation"
+  - "ITIL Foundation"
+
+languages:
+  - language: "Deutsch"
+    level: "Muttersprache"
+  - language: "Englisch"
+    level: "Verhandlungssicher (C1)"
+
+workExperience:
+  - period: "01/2022–heute"
+    role: "Freiberuflicher Product Owner & Projektmanager"
+    company: "Selbstständig"
+  - period: "06/2018–12/2021"
+    role: "Digital Product Owner"
+    company: "Finanzdienstleister AG"
+  - period: "03/2015–05/2018"
+    role: "Senior IT-Projektmanager"
+    company: "Versicherungskonzern GmbH"
+  - period: "09/2011–02/2015"
+    role: "IT-Projektmanager"
+    company: "Beratungshaus AG"
+  - period: "08/2008–08/2011"
+    role: "Junior Project Manager"
+    company: "Digitalagentur Beispiel GmbH"
+
+education:
+  - degree: "Master of Science (M.Sc.)"
+    institution: "Technische Universität Beispielstadt"
+    field: "Wirtschaftsinformatik"
+    focus:
+      - "Informationsmanagement"
+      - "Projektmanagement"
+      - "Software Engineering"
+    period: "10/2004–09/2008"
+  - degree: "Bachelor of Science (B.Sc.)"
+    institution: "Fachhochschule Beispielstadt"
+    field: "Wirtschaftsinformatik"
+    period: "10/2001–09/2004"

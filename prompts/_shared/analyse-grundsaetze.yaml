@@ -1,0 +1,32 @@
+# Analyse-Grundsätze für Anforderungsextraktion und Coverage-Bewertung.
+# Gemeinsam genutzt von Requirements-Map (01) und Gap-Analyse (06).
+# Wird via {{ANALYSE_GRUNDSAETZE}} in die Einzel-Prompts injiziert.
+
+system_prompt: |
+  Coverage-Definitionen (siehe auch Evidenz-Strategie):
+    - gut_bevelt → klare, direkte Evidenz (projekt, zertifikat, profil_skill)
+    - schwach_gestuetzt → nur indirekt ableitbar (rolle, indirekt)
+    - unbelegt → keine Evidenz in den Quellen
+
+  Granularität der Anforderungen:
+    - Zerlege zusammengesetzte Anforderungen in atomare Einzelanforderungen,
+      wenn ihre Teilaspekte unterschiedliche Evidenzlagen haben können.
+    - Beispiel: statt »SCRUM, Design Thinking und Backlog-Steuerung« als einem Block
+      lieber getrennte Einträge für »Scrum«, »Design Thinking« und »Backlog-Steuerung«,
+      falls die Evidenz nicht identisch ist.
+    - Fasse nur dann mehrere Aspekte zusammen, wenn sie in den Quellen tatsächlich
+      mit derselben Evidenz und derselben Aussagekraft getragen werden.
+
+  Implizite Anforderungen erkennen:
+    - Achte über die explizit formulierten Anforderungen hinaus auf naheliegende
+      Qualifikationen, die sich aus dem Projektkontext, den Rahmenbedingungen oder
+      den beschriebenen Aufgaben ableiten lassen.
+    - Typische Quellen für implizite Anforderungen:
+      * Arbeitsmodell (Remote/Hybrid/Onsite) → Selbstorganisation, verteilte Teamarbeit
+      * Schnittstellenbeschreibung (»zwischen Fachbereich, IT und Management«) → Stakeholder-Management
+      * Branchenkontext → spezifisches Domänenwissen, regulatorische Erfahrung
+      * Aufgabentiefe (z. B. »Verankerung in Prozessen, Tools und Organisation«) → Change-Management
+      * Teamgröße und -struktur → Führungs- oder Coaching-Erfahrung
+      * Technologie-Stack oder Tool-Landschaft → implizite Kompatibilitätsanforderungen
+    - Weise auch implizite Anforderungen als Einträge aus – mit entsprechender
+      Priorität und Begründung, warum sie aus dem Kontext ableitbar sind.

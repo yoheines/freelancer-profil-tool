@@ -1,0 +1,505 @@
+# Benutzerhandbuch
+
+Vom ersten Setup bis zum fertigen Profilentwurf – alle Schritte im Überblick.
+
+---
+
+## 1. Voraussetzungen
+
+| Was | Hinweis |
+|---|---|
+| **Node.js 18+** | `node --version` prüfen |
+| **npm** | `npm --version` prüfen |
+| **API-Key** | Kompatibler OpenAI-Endpoint (z. B. Crof AI, OpenAI, Azure, Ollama) |
+| **Profil + Projekte** | Dein CV, deine Projekthistorie (PDF, DOCX oder als Text) |
+
+## 2. Installation und Einrichtung
+
+```bash
+# Repository klonen
+git clone <repo-url>
+cd freelancer-profil-tool
+
+# Abhängigkeiten installieren
+npm install
+
+# API-Key hinterlegen
+mkdir -p secrets
+```
+
+Erstelle `secrets/secrets.local.yaml`:
+
+```yaml
+apiKey: "sk-dein-hier-echt-api-key"
+```
+
+**Wichtig:** `secrets/` ist in `.gitignore` – der Key landet nicht im Repository.
+
+### Config prüfen (optional)
+
+Die Datei `config/default.yaml` enthält die LLM-Konfiguration:
+
+```yaml
+llm:
+  provider: "openai-compatible"
+  baseURL: "https://crof.ai/v1"       # Dein API-Endpoint
+  model: "kimi-k2.6-precision"        # Dein Modell
+  maxTokens: 262144
+  temperature: 0
+
+pipeline:
+  projectSelection:
+    targetCount: 5                     # Anzahl Projekte im Profil
+  keywordSelection:
+    targetCount: 15                    # Anzahl Keywords
+```
+
+Passe `baseURL` und `model` an deinen API-Provider an.
+
+---
+
+## 3. Profil und Projekthistorie einpflegen
+
+Deine persönlichen Daten gehören in das **`sources/`**-Verzeichnis (`.gitignore`, nicht versioniert).
+
+```
+sources/
+├── profil.yaml              ← Dein Profil
+├── projekte.yaml            ← Deine Projekthistorie
+└── ausschreibungen/
+    └── product-owner.txt    ← Aktuelle Ausschreibung
+```
+
+### 3.1 YAML-Struktur verstehen
+
+**Profil (`profil.yaml`):**
+
+```yaml
+name: "Vorname Nachname"
+email: "mail@beispiel.de"
+phone: "+49 123 456 789"
+location: "Stadt"
+title: "Dein aktueller Titel"
+
+availability: "ab MM/JJJJ"          # oder "ab sofort"
+capacity: "bis zu 100%"
+onsiteWillingness: "bis zu 60%"
+
+summary: >
+  Zwei bis drei Sätze Executive Summary – was du machst, wo deine Schwerpunkte liegen.
+
+skills:
+  - name: "Skill-Name"
+  - name: "Nächster Skill"
+
+certifications:
+  - "Zertifikatsname"
+
+languages:
+  - language: "Deutsch"
+    level: "Muttersprache"
+
+workExperience:
+  - period: "MM/JJJJ–MM/JJJJ"
+    role: "Rolle"
+    company: "Firma"
+
+education:
+  - degree: "Abschluss"
+    institution: "Hochschule"
+    period: "MM/JJJJ–MM/JJJJ"
+```
+
+**Projekthistorie (`projekte.yaml`):**
+
+```yaml
+projects:
+  - id: "proj-kundenportal"
+    title: "Relaunch Online-Kundenportal"
+    client: "Kunde AG"
+    industry: "Versicherung"
+    description: >
+      Zwei bis vier Sätze: Was wurde gemacht, welche Rolle hattest du,
+      welche Technologien kamen zum Einsatz, welches Ergebnis wurde erzielt?
+    skills:
+      - "Scrum"
+      - "Kundenportal"
+      - "Stakeholder-Management"
+    duration: "01/2022–09/2022"
+```
+
+Ein vollständiges Beispiel findest du in `tests/fixtures/profile-sources/example-profil.yaml` und `tests/fixtures/project-histories/example-projekte.yaml`.
+
+### 3.2 Konvertierungs-Prompt: PDF/DOCX → YAML
+
+Wenn dein Profil bereits als CV (PDF, DOCX, Text) vorliegt, verwende diesen Prompt mit einem LLM deiner Wahl (z. B. ChatGPT, Claude, Kimi), um es in das YAML-Format zu überführen:
+
+---
+
+**Prompt:**
+
+```
+Ich habe einen Lebenslauf / ein Profil, das ich in ein strukturiertes YAML-Format überführen möchte. 
+Wandle den folgenden Text in das unten beschriebene YAML-Schema um. 
+
+Ergänze nur, was explizit im Text steht – erfinde keine Skills, Projekte oder Erfahrungen.
+Falls ein Feld im Quelltext nicht vorkommt, lass es weg oder setze einen leeren Wert.
+Achte auf die korrekte YAML-Syntax (Einrückung, Anführungszeichen bei Sonderzeichen).
+
+---
+
+YAML-Schema für das Profil (Datei: profil.yaml):
+
+name: "Vorname Nachname"
+email: "email@domain.de"
+phone: "+49 ..."
+location: "Stadt"
+title: "Aktuelle Berufsbezeichnung / Titel"
+availability: "ab MM/JJJJ oder ab sofort"
+capacity: "bis zu XX%"
+onsiteWillingness: "bis zu XX%"
+summary: >
+  Zwei bis drei Sätze Executive Summary.
+
+skills:
+  - name: "Skill 1"
+  - name: "Skill 2"
+
+certifications:
+  - "Zertifikat 1"
+
+languages:
+  - language: "Deutsch"
+    level: "Muttersprache"
+
+workExperience:
+  - period: "MM/JJJJ–MM/JJJJ"
+    role: "Rolle"
+    company: "Firma"
+
+education:
+  - degree: "Abschluss"
+    institution: "Hochschule"
+    period: "MM/JJJJ–MM/JJJJ"
+
+---
+
+YAML-Schema für die Projekthistorie (Datei: projekte.yaml):
+
+projects:
+  - id: "proj-kurzname"
+    title: "Projekttitel"
+    client: "Auftraggeber"
+    industry: "Branche"
+    description: >
+      2-4 Sätze: Beschreibung der Aufgabe, der Rolle, der Technologien/Methoden,
+      des Ergebnisses. Keine Übertreibungen, nur Fakten aus dem CV.
+    skills:
+      - "Verwendeter Skill / Technologie"
+    duration: "MM/JJJJ–MM/JJJJ"
+
+---
+
+Hier ist der Text meines Lebenslaufs:
+<Füge hier den Text deines CVs ein>
+```
+
+---
+
+Tipp: Wenn dein CV sehr umfangreich ist, extrahiere zuerst den Text (z. B. mit `pdftotext`) und füge ihn anstelle von `<Füge hier den Text deines CVs ein>` ein. Für DOCX-Dateien kannst du den Text direkt kopieren und einfügen oder Tools wie `pandoc` verwenden:
+
+```bash
+# PDF in Text konvertieren
+pdftotext mein-profil.pdf profil-text.txt
+
+# DOCX in Markdown konvertieren (für bessere Struktur)
+pandoc mein-profil.docx -o profil-text.md
+```
+
+---
+
+## 4. Prompts an eigene Präferenzen anpassen
+
+Alle LLM-Prompts liegen als YAML-Dateien in `prompts/`. Du kannst sie an deinen persönlichen Stil anpassen – ohne Code zu ändern.
+
+| Datei | Schritt | Anpassbar |
+|---|---|---|
+| `prompts/01-requirements-map-prompt.yaml` | Anforderungsanalyse | – |
+| `prompts/02-keywords-prompt.yaml` | Keyword-Kuration | Keyword-Auswahlregeln |
+| `prompts/03-rank-projects-prompt.yaml` | Projekt-Ranking | Ranking-Kriterien |
+| `prompts/04-profile-hook-prompt.yaml` | Einleitung | Stilvorgaben, verbotene Wörter, Beispiele |
+| `prompts/05-project-adaptation-prompt.yaml` | Projekt-Adaption | Stilvorgaben (z. B. Nominalstil) |
+| `prompts/06-gap-analysis-prompt.yaml` | Vorab-Review | – |
+
+### Shared-Strategien (zentrale Logik)
+
+Einige Regeln werden von mehreren Prompts gemeinsam genutzt und sind in `prompts/_shared/` zentral definiert:
+
+| Datei | Enthält |
+|---|---|
+| `prompts/_shared/evidenz-strategie.yaml` | Coverage-Definitionen, priority × coverage-Matrix, Claim-Kalibrierung |
+| `prompts/_shared/analyse-grundsaetze.yaml` | Granularitätsregeln, implizite Anforderungen erkennen |
+
+**Änderungen an Coverage-Stufen, Kombinationslogik oder Analyse-Prinzipien immer hier vornehmen** – sie gelten dann automatisch für alle Prompts, die die entsprechende Variable (`{{EVIDENZ_STRATEGIE}}` oder `{{ANALYSE_GRUNDSAETZE}}`) referenzieren.
+
+### Typische Anpassungen
+
+- **Stil der Einleitung** – `prompts/04-profile-hook-prompt.yaml`: "selbstbewusst, strategisch" oder "bescheiden, sachlich"?
+- **Verbotene Wörter** – `prompts/04-profile-hook-prompt.yaml`: Signalwörter wie "vorangetrieben" entfernen/hinzufügen
+- **Projekt-Stil** – `prompts/05-project-adaptation-prompt.yaml`: Nominalstil ("Leitung von…") vs. Ich-Perspektive
+- **Keyword-Fokus** – `prompts/02-keywords-prompt.yaml`: Sollen Methoden stärker gewichtet werden als Technologien?
+
+---
+
+## 5. Ausschreibungstext hinterlegen
+
+Lege die Job-Ausschreibung als Textdatei ab:
+- Format: **einfache `.txt`-Datei**
+- Ort: `sources/ausschreibungen/` (oder ein beliebiger anderer Pfad)
+- Inhalt: Kopiere den vollständigen Ausschreibungstext hinein
+
+```bash
+# Beispiel
+sources/ausschreibungen/product-owner.txt
+```
+
+---
+
+## 6. Gap Analysis durchführen
+
+Der `review`-Befehl prüft, wie gut deine Quellen zur Ausschreibung passen, **bevor** der eigentliche Profilentwurf erzeugt wird:
+
+```bash
+npx tsx src/cli/cli.ts review \
+  -p sources/ausschreibungen/product-owner.txt \
+  -s sources/profil.yaml \
+  -s sources/projekte.yaml
+```
+
+**Was passiert:**
+- Der LLM analysiert die Ausschreibung und extrahiert alle Anforderungen
+- Jede Anforderung wird bewertet: Priorität (hoch/mittel/niedrig) × Coverage (gut\_belegt/schwach\_gestuetzt/unbelegt)
+- Für unbelegte oder schwach gestützte Anforderungen gibt es Verbesserungsvorschläge
+
+**Ausgabe:** `runs/<run-id>/gap-analysis.yaml`
+
+**Ergebnis interpretieren:**
+
+```yaml
+findings:
+  - requirement: "Kenntnisse in Conversational AI"
+    status: "unbelegt"
+    priority: "niedrig"
+    gapPriority: "niedrig"
+    suggestedEvidence: "Projekt mit Chatbot-Integration oder entsprechende Zertifikate"
+    suggestedSourceLocation: "projektbeschreibung"
+```
+
+- **`status: unbelegt`** mit **`priority: hoch`** → kritische Lücke, unbedingt nachbessern
+- **`status: schwach_gestuetzt`** → vorhandene Evidenz im Profil/Projekttext klarer formulieren
+- **`status: gut_belegt`** → keine Aktion nötig
+
+---
+
+## 7. Profil nach der Gap Analysis nachschärfen
+
+Basierend auf der Gap Analysis kannst du deine Quelldaten verbessern:
+
+### Typische Nachschärfungen
+
+1. **Kritische Lücken schließen** (`unbelegt` + `priority: hoch`)
+   - Fehlende Skills im Profil ergänzen (falls vorhanden)
+   - Projektbeschreibungen um relevante Aspekte erweitern
+   - Ggf. fehlende Erfahrung durch Fortbildung/Projektarbeit nachweisen
+
+2. **Schwach gestützte Anforderungen stärken**
+   - Vorhandene Evidenz in Projektbeschreibungen **expliziter** formulieren
+   - Statt "war für Koordination zuständig" → "Abstimmung mit Fachbereich, IT und Management" 
+   - Konkrete Technologie- oder Methodennamen ergänzen
+
+3. **Unnötige Lücken vermeiden**
+   - Stelle sicher, dass deine Skills und Projekte die zentralen Anforderungen der Ausschreibung klar adressieren
+
+**Wichtig:** Erfinde keine Fakten. Das Tool erkennt auch nach der Nachschärfung, wenn etwas nicht belegbar ist – du machst nur vorhandene Evidenz besser sichtbar.
+
+---
+
+## 8. Generierungslauf durchführen
+
+Wenn die Gap Analysis zufriedenstellend ist, starte den Hauptlauf:
+
+```bash
+npx tsx src/cli/cli.ts run \
+  -p sources/ausschreibungen/product-owner.txt \
+  -s sources/profil.yaml \
+  -s sources/projekte.yaml \
+  --top-projects 5 \
+  --language de
+```
+
+### Flags im Überblick
+
+| Flag | Beschreibung | Standard |
+|---|---|---|
+| `-p, --posting` | Pfad zur Ausschreibung (Pflicht) | – |
+| `-s, --sources` | Quellen (Profil + Projekte, mehrfach oder kommasepariert) | – |
+| `-t, --steering` | Optionale Steuerhinweise für den Lauf | – |
+| `-c, --config` | Pfad zur Config-Datei | `config/default.yaml` |
+| `--top-projects` | Anzahl Projekte im Profil | aus Config |
+| `--language` | Zielsprache (`de` oder `en`) | `de` |
+
+**Zielsprache einstellen:**
+
+```bash
+# Deutsches Profil
+--language de
+
+# Englisches Profil
+--language en
+```
+
+**Steuerhinweise verwenden:**
+
+```bash
+# Schwerpunkte oder Hinweise für die Ausrichtung
+-t "Stärker auf Führungserfahrung eingehen" -t "Budgetverantwortung betonen"
+```
+
+---
+
+## 9. Generierte Dateien prüfen
+
+Nach erfolgreichem Lauf liegen alle Ergebnisse in `runs/<run-id>/`:
+
+### `profile-draft.md`
+
+**Der generierte Profilentwurf** – das Hauptprodukt. Enthält:
+- Keywords am Anfang des Dokuments
+- Einleitung (aus Schritt 5)
+- Adaptierte Projektbeschreibungen
+- Qualifikationen (Skills, Zertifikate, Sprachen, Ausbildung, Karrierestationen)
+- Kontaktdaten
+
+**Prüfe:**
+- Klingt die Einleitung authentisch und passend zur Ausschreibung?
+- Sind die Projektbeschreibungen korrekt (keine erfundenen Fakten)?
+- Fehlen wichtige Aspekte, die im Profil vorhanden sind, aber nicht im Entwurf auftauchen?
+
+### `intermediate.yaml`
+
+**Die fachliche Herleitung des Laufs.** Zeigt:
+- Welche Anforderungen erkannt wurden (Requirements Map mit Priorität, Coverage, Evidenz)
+- Welche Keywords ausgewählt wurden
+- Wie die Projekte gerankt sind (mit Begründungen)
+- Welcher Kompositionsplan (Abschnitte + Modi) angewandt wurde
+
+**Prüfe:**
+- Wurden alle wichtigen Anforderungen erkannt?
+- Ist die Priorisierung nachvollziehbar?
+- Sind die richtigen Projekte ausgewählt?
+
+### `diagnostics.yaml`
+
+**Diagnose und Nachschärfungsvorschläge.** Enthält:
+- Laufzeiten und LLM-Nutzung
+- Strukturelle Schwächen (schwach gestützte und unbelegte Anforderungen)
+- Konkrete Nachschärfungsvorschläge (z. B. "vorhandene Evidenz expliziter ausformulieren")
+- Zusammensetzung des Entwurfs (Anzahl generierter/adaptierter/statischer Abschnitte)
+
+**Prüfe:**
+- Welche Anforderungen sind nur schwach gestützt? Kannst du die Evidenz verbessern?
+- Sind `warnings` dabei? Das sind echte Lücken, die du vor dem nächsten Lauf schließen solltest.
+
+### `llm-traces.yaml`
+
+**Prompt/Response-Traces aller LLM-Calls.** Enthält:
+- Vollständige Prompts (inklusive expandierter Shared-Strategien)
+- LLM-Antworten
+- Token-Verbrauch pro Call
+
+**Wofür:** Debugging und Optimierung der eigenen Prompts. Wenn die Ausgabe nicht deinen Erwartungen entspricht, findest du hier, was genau an das LLM gesendet wurde.
+
+### `gap-analysis.yaml` (nur nach `review`-Befehl)
+
+Die Gap-Analyse – nur verfügbar, wenn du zuvor `npx tsx src/cli/cli.ts review` ausgeführt hast.
+
+---
+
+## 10. Ergebnisse inspizieren (CLI)
+
+Das `inspect`-Kommando zeigt die wichtigsten Metadaten eines abgeschlossenen Laufs:
+
+```bash
+npx tsx src/cli/cli.ts inspect 20260517-ca5159
+```
+
+Es zeigt:
+- Kompositionsmodi der Abschnitte
+- Diagnostics (Schwächen, Laufzeit)
+- Nachschärfungsbedarf
+
+---
+
+## 11. Workflow-Wiederholung
+
+Ein realistischer Arbeitszyklus sieht so aus:
+
+```mermaid
+flowchart LR
+    A[Ausschreibung erhalten] --> B[Review / Gap Analysis]
+    B --> C{Genug Lücken?}
+    C -->|Ja| D[Profil nachschärfen]
+    D --> B
+    C -->|Nein| E[Generierungslauf]
+    E --> F[Ergebnisse prüfen]
+    F --> G{Profil passt?}
+    G -->|Ja| H[Fertig – Profil versenden]
+    G -->|Nein| I[Prompts anpassen]
+    I --> E
+    G -->|Nein| J[Quellen ergänzen]
+    J --> B
+```
+
+---
+
+## Vollständiges Beispiel (von 0 auf Profil)
+
+```bash
+# 1. Profil und Projekte in sources/ ablegen
+#    (PDF-Konvertierung mit Prompt aus Abschnitt 3.2)
+
+# 2. Ausschreibungstext speichern
+cp ~/Downloads/product-owner.txt sources/ausschreibungen/
+
+# 3. Gap Analysis
+npx tsx src/cli/cli.ts review \
+  -p sources/ausschreibungen/product-owner.txt \
+  -s sources/profil.yaml \
+  -s sources/projekte.yaml
+
+# 4. (optional) Profil nachschärfen, basierend auf der gap-analysis.yaml
+
+# 5. Generierung
+npx tsx src/cli/cli.ts run \
+  -p sources/ausschreibungen/product-owner.txt \
+  -s sources/profil.yaml \
+  -s sources/projekte.yaml \
+  --top-projects 5 \
+  --language de
+
+# 6. Ergebnis prüfen
+cat runs/*/profile-draft.md
+```
+
+---
+
+## Fehlt noch was?
+
+Folgende Themen sind hier nicht vertieft:
+
+- **CI/CD einrichten** – Wiederkehrende Läufe automatisieren (z. B. per Makefile oder npm script)
+- **Mehrere Profile verwalten** – Unterschiedliche Profile für verschiedene Zielbranchen
+- **Eigener LLM-Provider** – Andere Endpunkte als Crof AI (OpenAI, Azure, Ollama, lokal)
+- **Batch-Verarbeitung** – Mehrere Ausschreibungen nacheinander durchlaufen
+
+Wenn du eines dieser Themen vertiefen möchtest, erweitere ich das Handbuch gerne.
