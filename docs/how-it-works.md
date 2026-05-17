@@ -1,10 +1,10 @@
-# So Funktioniert Das Tool
+# So funktioniert das Tool
 
 ## Zweck
 
-Das Freelancer Profil Tool erzeugt aus einer konkreten Ausschreibung und vorhandenen Quelldaten einen ausschreibungsspezifischen Profilentwurf.
+Das Freelancer-Profil-Tool erzeugt aus einer konkreten Ausschreibung und vorhandenen Quelldaten einen auf die Ausschreibung zugeschnittenen Profilentwurf.
 
-Das System tut dabei nicht einfach "eine Ausschreibung in Text umschreiben", sondern arbeitet in mehreren fachlich getrennten Schritten. Jeder Schritt bekommt klar definierte Eingaben, erzeugt klar definierte Ausgaben und reicht diese an den nächsten Schritt weiter.
+Das System schreibt nicht einfach die Ausschreibung in anderen Worten neu, sondern arbeitet in mehreren fachlich getrennten Schritten. Jeder Schritt bekommt klar definierte Eingaben, erzeugt klar definierte Ausgaben und reicht diese an den nächsten Schritt weiter.
 
 Dieses Dokument beschreibt diese Logik aus Anwendersicht.
 
@@ -27,8 +27,8 @@ Ein Lauf basiert auf vier Eingabearten:
    - Auslastung
    - Onsite-Bereitschaft
 
-3. **Projektquelle**  
-   Wiederverwendbare Projekthistorie mit einzelnen Referenzprojekten.
+ 3. **Projektquelle**  
+    Wiederverwendbare Projektliste mit einzelnen Referenzprojekten.
 
 4. **Optionale Steuerhinweise**  
    Zusätzliche Vorgaben für diesen einen Lauf, zum Beispiel Schwerpunktsetzungen oder gewünschte Positionierung.
@@ -85,7 +85,7 @@ Der Lauf beantwortet nacheinander diese Fragen:
 
 **Warum dieser Schritt wichtig ist**
 
-Alle späteren Entscheidungen bauen auf diesen Daten auf. Wenn hier etwas fehlt oder falsch ist, soll der Lauf nicht mit stillen Annahmen weiterlaufen.
+Alle späteren Entscheidungen bauen auf diesen Daten auf. Wenn hier etwas fehlt oder falsch ist, soll der Lauf nicht mit stillschweigenden Annahmen fortfahren.
 
 ### 1. Anforderungsabdeckung bewerten
 
@@ -101,7 +101,7 @@ Alle späteren Entscheidungen bauen auf diesen Daten auf. Wenn hier etwas fehlt 
 - Der LLM leitet alle relevanten Anforderungen aus der Ausschreibung ab – sowohl explizite als auch implizite (z. B. Change-Management bei Aufgabentiefe, Stakeholder-Management bei Schnittstellenbeschreibung).
 - Für jede Anforderung bewertet er Priorität, Coverage und den Typ der stärksten Evidenz im vorhandenen Material.
 - Zusammengesetzte Anforderungen werden bei Bedarf in atomare Einzelanforderungen zerlegt, wenn ihre Teilaspekte unterschiedlich gut belegt sind.
-- Diese kompakte Requirements-Map steuert danach die Gewichtung in Keyword-Kuration, Ranking, Hook, Projektadaption und Diagnostics.
+- Die Requirements-Map steuert danach die Gewichtung in Keyword-Kuration, Ranking, Hook, Projektadaption und Diagnostics.
 - Die Analyse-Grundsätze (Granularität, implizite Anforderungen) sind zentral in `prompts/_shared/analyse-grundsaetze.yaml` definiert und gelten auch für die Gap-Analyse im Review-Befehl.
 
 **Ausgabe dieses Schritts**
@@ -123,7 +123,7 @@ Alle späteren Entscheidungen bauen auf diesen Daten auf. Wenn hier etwas fehlt 
 - Das System sammelt Skills, Zertifikate und Sprach-/Profilmerkmale aus Profil und Projekthistorie.
 - Der LLM priorisiert daraus die relevantesten Keywords für die konkrete Ausschreibung bis zur konfigurierten Zielanzahl.
 - Die Requirements-Map gibt vor, welche belegten Anforderungen besonders stark gewichtet werden sollen.
-- Basale Sprachangaben wie Deutsch werden nicht als Leitsignal-Keywords aufgenommen.
+- Einfache Sprachangaben wie Deutsch werden nicht als Leitsignal-Keywords aufgenommen.
 
 **Ausgabe dieses Schritts**
 
@@ -183,7 +183,7 @@ Jede Kombination aus Priorität (`hoch`/`mittel`/`niedrig`) und Coverage steuert
 **Verarbeitung**
 
 - Der LLM bekommt alle verfügbaren Projekte zusammen mit dem Ausschreibungstext.
-- Er bewertet die Projekte direkt auf Relevanz und nutzt die Requirements-Map als priorisierten Zwischenvertrag.
+- Er bewertet die Projekte unmittelbar auf ihre Relevanz zur Ausschreibung und nutzt die Requirements-Map als priorisierten Zwischenvertrag.
 - Er wählt die besten Projekte bis zur konfigurierten Zielanzahl.
 - Wenn gar keine Projekte vorliegen, bricht der Lauf mit einem Validierungsfehler ab.
 
@@ -202,8 +202,8 @@ Jede Kombination aus Priorität (`hoch`/`mittel`/`niedrig`) und Coverage steuert
 
 **Verarbeitung**
 
-- Der LLM formuliert eine seniorige, ausschreibungsnahe Einleitung direkt aus Ausschreibung, Profil und Projektdaten.
-- Die Einleitung nutzt die Requirements-Map zur Gewichtung, darf aber keine nicht ableitbaren Aussagen erfinden.
+- Der LLM formuliert eine ausschreibungsnahe Einleitung auf Senior-Niveau direkt aus Ausschreibung, Profil und Projektdaten.
+- Die Einleitung nutzt die Requirements-Map zur Gewichtung, darf aber keine Aussagen enthalten, die sich nicht aus den Quellen ableiten lassen.
 - Die Evidenz-Strategie (`priority` × `coverage` aus der zentralen `prompts/_shared/evidenz-strategie.yaml`) steuert, wie stark eine Anforderung formuliert werden darf.
 - Hookspezifische Regeln wie die verbotenen Signalwörter und die Beispiele zur Kalibrierung sind im Prompt-Template `04-profile-hook-prompt.yaml` definiert.
 
@@ -224,10 +224,10 @@ Jede Kombination aus Priorität (`hoch`/`mittel`/`niedrig`) und Coverage steuert
 
 **Verarbeitung**
 
-- Die ausgewählten Projekte werden in der festgelegten Reihenfolge vom LLM adaptiert.
-- Der LLM leitet aus Ausschreibung, Projekttext und Requirements-Map ab, welche Aspekte hervorzuheben sind.
+- Der LLM bearbeitet die ausgewählten Projekte in der festgelegten Reihenfolge.
+- Aus Ausschreibung, Projekttext und Requirements-Map leitet er ab, welche Aspekte hervorzuheben sind.
 - Die Evidenz-Strategie (Coverage × Priorität) gibt vor, ob und wie stark eine Anforderung im Projekttext betont werden darf.
-- Faktische Informationen bleiben exakt erhalten – es werden keine Aufgaben, Technologien oder Ergebnisse hinzugefügt.
+- Alle Tatsachenangaben bleiben exakt erhalten – es werden keine Aufgaben, Technologien oder Ergebnisse hinzugefügt.
 - Die Einleitung aus Schritt 5 wird in den passenden Abschnitt eingefügt.
 
 **Ausgabe dieses Schritts**
@@ -249,7 +249,7 @@ Jede Kombination aus Priorität (`hoch`/`mittel`/`niedrig`) und Coverage steuert
 **Verarbeitung**
 
 - Das System setzt die Sektionen in die finale Dokumentreihenfolge.
-- **Qualifikationen** werden deterministisch aus den Profildaten aufgebaut: Kernkompetenzen (Keywords als kompakte Stichwortzeile sowie ausführliche Liste), Zertifikate, Sprachen, Ausbildung und Karrierestationen.
+- **Qualifikationen** werden deterministisch aus den Profildaten aufgebaut: Kernkompetenzen (Keywords als kompakte Stichwortzeile und als ausführliche Liste), Zertifikate, Sprachen, Ausbildung und Karrierestationen.
 - **Kontaktdaten** werden statisch aus dem Profil übernommen. 
 - Die Arbeits-Headline wird aus der ersten Zeile der Ausschreibung abgeleitet.
 
@@ -267,7 +267,7 @@ Jede Kombination aus Priorität (`hoch`/`mittel`/`niedrig`) und Coverage steuert
 
 **Verarbeitung**
 
-- Das System analysiert Laufdauer, LLM-Nutzung und die Zusammensetzung des Entwurfs.
+- Das System analysiert die Dauer des Laufs, den LLM-Token-Verbrauch und die Zusammensetzung des Entwurfs.
 - Zusätzlich werden aus der Requirements-Map schwach gestützte und unbelegte Anforderungen als Schwächen und Nachschärfungsbedarf abgeleitet.
 
 **Ausgabe dieses Schritts**
@@ -284,7 +284,7 @@ Jede Kombination aus Priorität (`hoch`/`mittel`/`niedrig`) und Coverage steuert
 
 **Verarbeitung**
 
-- Das System legt einen neuen Laufordner an.
+- Das System legt einen neuen Lauf-Ordner an.
 - Dort werden alle Ergebnisse getrennt gespeichert.
 
 **Ausgabe dieses Schritts**
@@ -329,13 +329,13 @@ Die technischen Prompt-/Response-Traces. Diese Datei ist vor allem für tiefere 
 
 ## Wie du die Logik eines einzelnen Laufs nachvollziehst
 
-Wenn du verstehen willst, warum ein konkreter Entwurf so aussieht, ist die sinnvollste Reihenfolge:
+Wenn du verstehen willst, warum ein konkreter Entwurf so aussieht, ergibt sich diese Reihenfolge:
 
 1. `profile-draft.md` lesen
 2. `diagnostics.yaml` auf Lücken und Warnhinweise prüfen
 3. `intermediate.yaml` für Anforderungen, Belege und Projektauswahl ansehen
 
-So lässt sich fachlich nachvollziehen,
+So lässt sich fachlich nachvollziehen:
 
 - was das System aus der Ausschreibung gelesen hat
 - welche Aussagen es belegen konnte
