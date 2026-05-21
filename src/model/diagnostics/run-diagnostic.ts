@@ -40,8 +40,7 @@ export interface RunDiagnostic {
   llmUsage: LlmUsage;
   outputRefs: {
     draftPath: string;
-    intermediatePath: string;
-    diagnosticsPath: string;
+    metaPath?: string;
     gapAnalysisPath?: string;
   };
 }

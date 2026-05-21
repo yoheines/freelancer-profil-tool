@@ -5,13 +5,11 @@
 
 import type { ProfileCompositionDecision } from "../../../model/composition/profile-composition-decision.js";
 import type { RequirementsMap } from "../../../model/coverage/requirements-map.js";
-import type { ProfileDraft } from "../../../model/draft/profile-draft.js";
 import type { RunDiagnostic, StepTiming, StructuralWeakness, RefinementSuggestion } from "../../../model/diagnostics/run-diagnostic.js";
 import type { ProfileGapAnalysis } from "../../../model/review/profile-gap-analysis.js";
 
 export interface DiagnosticsInput {
   composition: ProfileCompositionDecision;
-  draft: ProfileDraft;
   stepTimings: StepTiming[];
   llmTokens: number;
   llmCalls: number;
@@ -25,8 +23,7 @@ export interface DiagnosticsInput {
   gapAnalysis?: ProfileGapAnalysis;
   outputRefs: {
     draftPath: string;
-    intermediatePath: string;
-    diagnosticsPath: string;
+    metaPath?: string;
     gapAnalysisPath?: string;
   };
 }

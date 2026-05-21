@@ -139,11 +139,9 @@ export function renderInspect(data: InspectData): string {
   lines.push(`  Sections: ${data.diagnostics.compositionSummary.totalSections} (${data.diagnostics.compositionSummary.staticCount} static, ${data.diagnostics.compositionSummary.adaptedCount} adapted, ${data.diagnostics.compositionSummary.generatedCount} generated)`);
 
   lines.push(`\n  Outputs:`);
-  lines.push(`    📄 Draft:      ${data.diagnostics.outputRefs.draftPath}`);
-  lines.push(`    📋 Intermediate: ${data.diagnostics.outputRefs.intermediatePath}`);
-  lines.push(`    🔍 Diagnostics:  ${data.diagnostics.outputRefs.diagnosticsPath}`);
-  if (data.diagnostics.outputRefs.gapAnalysisPath) {
-    lines.push(`    🧭 Gap-Analyse: ${data.diagnostics.outputRefs.gapAnalysisPath}`);
+  lines.push(`    📄 YAML: ${data.diagnostics.outputRefs.draftPath}`);
+  if (data.diagnostics.outputRefs.metaPath) {
+    lines.push(`    📋 Meta:  ${data.diagnostics.outputRefs.metaPath}`);
   }
 
   return lines.join("\n");

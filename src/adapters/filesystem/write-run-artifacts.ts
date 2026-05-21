@@ -1,101 +1,94 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { stringify } from "yaml";
-import type { ProfileDraft } from "../../model/draft/profile-draft.js";
+import type { ProfileYamlData } from "../../model/draft/profile-draft.js";
 import type { ProfileCompositionDecision } from "../../model/composition/profile-composition-decision.js";
 import type { RunDiagnostic } from "../../model/diagnostics/run-diagnostic.js";
 import type { ProfileGapAnalysis } from "../../model/review/profile-gap-analysis.js";
-import { ValidationError } from "../../shared/errors/app-error.js";
-import {
-  profileCompositionDecisionSchema,
-  intermediateModelSchema,
-} from "../../model/schemas/intermediate-schema.js";
-
-export interface RunArtifactPaths {
-  runDir: string;
-  draftPath: string;
-  intermediatePath: string;
-  diagnosticsPath: string;
-  gapAnalysisPath?: string;
-}
 
 export async function ensureRunDir(runDir: string): Promise<void> {
   await mkdir(runDir, { recursive: true });
 }
 
-export async function writeIntermediateModel(
+// ── profile-draft.yaml ───────────────────────────────────────────────────
+
+export async function writeProfileDraft(
   runDir: string,
-  data: {
-    compositionPlan: ProfileCompositionDecision;
-    requirementsMap?: Array<{ requirement: string; priority: string; coverage: string; evidenceType: string; keyEvidence: string }>;
-    skillKeywords?: string[];
-    projectRankings?: Array<{ rank: number; id: string; title: string; rationale: string }>;
-    gapAnalysis?: ProfileGapAnalysis;
-    inputs: { postingPath: string; sourcePaths: string[]; steeringHints: string[]; targetLanguage?: string };
-  },
+  yamlData: ProfileYamlData,
 ): Promise<string> {
-  const intermediate: Record<string, unknown> = {
+  const yamlPath = `${runDir}/profile-draft.yaml`;
+  await writeFile(yamlPath, stringify(yamlData), "utf-8");
+  return yamlPath;
+}
+
+// ── run-meta.yaml (ersetzt intermediate.yaml + diagnostics.yaml) ──────────
+
+export interface RunMetaInput {
+  runId: string;
+  createdAt: string;
+  inputs: {
+    postingPath: string;
+    sourcePaths: string[];
+    steeringHints: string[];
+    targetLanguage?: string;
+  };
+  compositionPlan: ProfileCompositionDecision;
+  requirementsMap?: Array<{
+    requirement: string;
+    priority: string;
+    coverage: string;
+    evidenceType: string;
+    keyEvidence: string;
+  }>;
+  skillKeywords?: string[];
+  projectRankings?: Array<{
+    rank: number;
+    id: string;
+    title: string;
+    rationale: string;
+  }>;
+  gapAnalysis?: ProfileGapAnalysis;
+  diagnostics: RunDiagnostic;
+}
+
+export async function writeRunMeta(
+  runDir: string,
+  data: RunMetaInput,
+): Promise<string> {
+  const runMeta: Record<string, unknown> = {
     runMetadata: {
-      runId: runDir.split("/").pop(),
-      createdAt: new Date().toISOString(),
+      runId: data.runId,
+      createdAt: data.createdAt,
     },
-    inputs: {
-      postingPath: data.inputs.postingPath,
-      sourcePaths: data.inputs.sourcePaths,
-      steeringHints: data.inputs.steeringHints,
-      targetLanguage: data.inputs.targetLanguage,
-    },
+    inputs: { ...data.inputs },
     compositionPlan: data.compositionPlan,
   };
 
   if (data.requirementsMap && data.requirementsMap.length > 0) {
-    intermediate.requirementsMap = data.requirementsMap;
+    runMeta.requirementsMap = data.requirementsMap;
   }
-
   if (data.skillKeywords && data.skillKeywords.length > 0) {
-    intermediate.skillKeywords = data.skillKeywords;
+    runMeta.skillKeywords = data.skillKeywords;
   }
-
   if (data.projectRankings && data.projectRankings.length > 0) {
-    intermediate.projectRankings = data.projectRankings;
+    runMeta.projectRankings = data.projectRankings;
   }
-
   if (data.gapAnalysis) {
-    intermediate.gapAnalysis = data.gapAnalysis;
+    runMeta.gapAnalysis = data.gapAnalysis;
   }
 
-  const compositionResult = profileCompositionDecisionSchema.safeParse(data.compositionPlan);
-  if (!compositionResult.success) {
-    throw new ValidationError("Composition plan validation failed", {
-      issues: compositionResult.error.issues,
-    });
-  }
+  runMeta.diagnostics = data.diagnostics;
 
-  // Validate the full model shape
-  const fullResult = intermediateModelSchema.safeParse(intermediate);
-  if (!fullResult.success) {
-    throw new ValidationError("Intermediate model validation failed", {
-      issues: fullResult.error.issues,
-    });
-  }
-
-  const path = `${runDir}/intermediate.yaml`;
-  await writeFile(path, stringify(intermediate), "utf-8");
+  const path = `${runDir}/run-meta.yaml`;
+  await writeFile(path, stringify(runMeta), "utf-8");
   return path;
 }
 
-export async function writeProfileDraft(runDir: string, draft: ProfileDraft): Promise<string> {
-  const path = `${runDir}/profile-draft.md`;
-  await writeFile(path, draft.content, "utf-8");
-  return path;
-}
+// ── gap-analysis.yaml (nur für review-Befehl) ─────────────────────────────
 
-export async function writeDiagnostics(runDir: string, diagnostics: RunDiagnostic): Promise<string> {
-  const path = `${runDir}/diagnostics.yaml`;
-  await writeFile(path, stringify(diagnostics), "utf-8");
-  return path;
-}
-
-export async function writeGapAnalysis(runDir: string, gapAnalysis: ProfileGapAnalysis): Promise<string> {
+export async function writeGapAnalysis(
+  runDir: string,
+  gapAnalysis: ProfileGapAnalysis,
+): Promise<string> {
   const path = `${runDir}/gap-analysis.yaml`;
   await writeFile(path, stringify(gapAnalysis), "utf-8");
   return path;

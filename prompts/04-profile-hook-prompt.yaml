@@ -27,7 +27,7 @@ system_prompt: |
   - Auf die konkrete Ausschreibung zugeschnitten sein
   - Authentisch und professionell sein, nicht generisch
   - NICHT Übertreiben oder Verantwortung erfinden
-  - 3-5 Sätze lang sein
+  - 2-3 Sätze lang sein (maximal 350 Zeichen)
   - Sprache: {{TARGET_LANGUAGE}}
   - Gib NUR den Text zurück, keine Erklärungen, keine Markdown-Formatierung.
 

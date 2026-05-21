@@ -10,7 +10,8 @@ import { renderRunSummary } from "../presenters/render-run-summary.js";
 import { renderError } from "../presenters/render-error.js";
 import { loadAppConfig } from "../../adapters/config/load-app-config.js";
 import { loadSecretsConfig } from "../../adapters/config/load-secrets-config.js";
-import type { AppConfig } from "../../model/config/app-config.js";
+import { extractPdfDataFromRun } from "../../adapters/pdf/extract-pdf-data.js";
+import { writeProfilePdf } from "../../adapters/pdf/write-profile-pdf.js";
 import type { RunInputs, SourceDocument } from "../../model/input/job-posting-input.js";
 import { normalizeProfileLanguage } from "../../shared/i18n/profile-language.js";
 
@@ -21,14 +22,14 @@ export function createRunCommand(): Command {
     .option("-s, --sources <paths...>", "Paths to source material files (kommasepariert oder Flag mehrfach verwenden)")
     .option("-t, --steering <hints...>", 'Optional steering hints, e.g. -t "Fokus auf Cloud"')
     .option("-c, --config <path>", "Path to config file (default: config/default.yaml)")
-    .option("--top-projects <n>", "Maximale Anzahl gerankter und adaptierter Projekte")
     .option("--language <de|en>", "Zielsprache des Profils (de oder en)")
+    .option("--pdf", "Zusätzlich PDF aus dem generierten Profil erzeugen")
     .action(async (rawOptions: Record<string, unknown>) => {
       try {
         const options = parseCliOptions(rawOptions);
 
         // Load configuration
-        const config = applyTopProjectsOverride(await loadAppConfig(options.config), options.topProjects);
+        const config = await loadAppConfig(options.config);
         const secrets = await loadSecretsConfig();
 
         // Check for API key
@@ -61,8 +62,8 @@ export function createRunCommand(): Command {
         if (inputs.steering.hints.length > 0) {
           console.log(`  Steering: ${inputs.steering.hints.join(", ")}`);
         }
-        console.log(`  Zielanzahl Projekte: ${config.pipeline.projectSelection.targetCount}`);
-        console.log(`  Zielanzahl Keywords: ${config.pipeline.keywordSelection.targetCount}`);
+        console.log(`  Projekte: max. ${config.pipeline.projectSelection.targetCount}`);
+        console.log(`  Keywords: ${config.pipeline.keywordSelection.targetCount}`);
         console.log(`  Profilsprache: ${inputs.targetLanguage}`);
         console.log(`  Model: ${config.llm.model} @ ${config.llm.baseURL}\n`);
 
@@ -70,6 +71,19 @@ export function createRunCommand(): Command {
 
         if (result.ok) {
           console.log(renderRunSummary(result));
+
+          // Optional: PDF generieren
+          if (options.pdf) {
+            console.log(`\n📄 Generating PDF...`);
+            try {
+              const pdfData = await extractPdfDataFromRun(result.runId);
+              const pdfPath = await writeProfilePdf(`./runs/${result.runId}`, pdfData, config.pdf?.templatePath);
+              console.log(`  PDF: ${pdfPath}`);
+            } catch (pdfErr) {
+              const msg = pdfErr instanceof Error ? pdfErr.message : String(pdfErr);
+              console.error(`  ⚠ PDF generation failed: ${msg}`);
+            }
+          }
         } else {
           console.error(renderError(result));
           process.exit(1);
@@ -84,23 +98,4 @@ export function createRunCommand(): Command {
   return command;
 }
 
-function applyTopProjectsOverride(config: AppConfig, topProjects?: number): AppConfig {
-  if (topProjects === undefined) {
-    return config;
-  }
 
-  if (!Number.isInteger(topProjects) || topProjects < 1) {
-    throw new Error("--top-projects muss eine positive ganze Zahl sein");
-  }
-
-  return {
-    ...config,
-    pipeline: {
-      ...config.pipeline,
-      projectSelection: {
-        ...config.pipeline.projectSelection,
-        targetCount: topProjects,
-      },
-    },
-  };
-}

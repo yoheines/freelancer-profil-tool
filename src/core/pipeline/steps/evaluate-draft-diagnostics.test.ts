@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import { evaluateDraftDiagnostics } from "./evaluate-draft-diagnostics.js";
 import type { DiagnosticsInput } from "./evaluate-draft-diagnostics.js";
 import type { ProfileCompositionDecision } from "../../../model/composition/profile-composition-decision.js";
-import type { ProfileDraft } from "../../../model/draft/profile-draft.js";
 import type { StepTiming } from "../../../model/diagnostics/run-diagnostic.js";
 
 function makeInput(overrides?: Partial<DiagnosticsInput>): DiagnosticsInput {
@@ -14,26 +13,18 @@ function makeInput(overrides?: Partial<DiagnosticsInput>): DiagnosticsInput {
     ],
   };
 
-  const draft: ProfileDraft = {
-    sections: [],
-    content: "",
-  };
-
   const stepTimings: StepTiming[] = [
     { name: "compose", durationMs: 200, status: "ok" },
   ];
 
   return {
     composition,
-    draft,
     stepTimings,
     llmTokens: 500,
     llmCalls: 3,
     projectRankings: [],
     outputRefs: {
       draftPath: "/tmp/draft.md",
-      intermediatePath: "/tmp/intermediate",
-      diagnosticsPath: "/tmp/diagnostics.json",
     },
     ...overrides,
   };

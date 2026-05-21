@@ -21,7 +21,6 @@ interface ProjectEntry {
 
 interface ProfileEntry {
   skills?: Array<{ name?: string }>;
-  certifications?: string[];
   languages?: Array<{ language?: string; level?: string }>;
 }
 
@@ -55,11 +54,6 @@ export async function curateSkillKeywords(
   for (const skill of profileData?.skills ?? []) {
     if (skill.name && !isExcludedKeywordCandidate(skill.name) && allTechnologies.add(skill.name)) {
       candidateKeywords.push(skill.name);
-    }
-  }
-  for (const certification of profileData?.certifications ?? []) {
-    if (!isExcludedKeywordCandidate(certification) && allTechnologies.add(certification)) {
-      candidateKeywords.push(certification);
     }
   }
   for (const language of profileData?.languages ?? []) {

@@ -8,8 +8,7 @@ export interface PipelineSuccess {
   ok: true;
   runId: string;
   draftPath: string;
-  intermediatePath: string;
-  diagnosticsPath: string;
+  metaPath: string;
   summary: string;
 }
 

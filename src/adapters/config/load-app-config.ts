@@ -1,11 +1,12 @@
 import { parseYamlFile } from "../serialization/parse-yaml-file.js";
-import type { AppConfig } from "../../model/config/app-config.js";
+import type { AppConfig, PdfConfig } from "../../model/config/app-config.js";
 import { ConfigError } from "../../shared/errors/app-error.js";
 
 export async function loadAppConfig(path: string = "./config/default.yaml"): Promise<AppConfig> {
   const raw = await parseYamlFile<{
     workspace?: { runsDir?: string; sourcesDir?: string };
     pipeline?: { projectSelection?: { targetCount?: number }; keywordSelection?: { targetCount?: number } };
+    pdf?: { templatePath?: string };
     llm?: { provider?: string; baseURL?: string; model?: string; maxTokens?: number; temperature?: number };
   }>(path);
 
@@ -25,6 +26,10 @@ export async function loadAppConfig(path: string = "./config/default.yaml"): Pro
     });
   }
 
+  const pdf: PdfConfig = {
+    templatePath: raw.pdf?.templatePath ?? "pdf-templates/profil-template.html",
+  };
+
   return {
     workspace: {
       runsDir: raw.workspace?.runsDir ?? "./runs",
@@ -38,6 +43,7 @@ export async function loadAppConfig(path: string = "./config/default.yaml"): Pro
         targetCount: keywordTargetCount,
       },
     },
+    pdf,
     llm: {
       provider: raw.llm?.provider ?? "openai-compatible",
       baseURL: raw.llm?.baseURL ?? "https://api.openai.com/v1",

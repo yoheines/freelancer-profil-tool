@@ -7,8 +7,8 @@ export interface CliRunOptions {
   sources: string[];
   steering?: string[];
   config?: string;
-  topProjects?: number;
   language?: string;
+  pdf?: boolean;
 }
 
 export function parseCliOptions(raw: Record<string, unknown>): CliRunOptions {
@@ -32,11 +32,7 @@ export function parseCliOptions(raw: Record<string, unknown>): CliRunOptions {
     sources,
     steering: raw.steering as string[] | undefined,
     config: raw.config as string | undefined,
-    topProjects: typeof raw.topProjects === "string"
-      ? Number.parseInt(raw.topProjects, 10)
-      : typeof raw.topProjects === "number"
-        ? raw.topProjects
-        : undefined,
     language: raw.language as string | undefined,
+    pdf: raw.pdf === true,
   };
 }

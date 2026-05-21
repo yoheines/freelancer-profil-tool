@@ -12,6 +12,7 @@ import { Command } from "commander";
 import { createRunCommand } from "./commands/run-profile-generation.js";
 import { createInspectCommand } from "./commands/inspect-run.js";
 import { createReviewCommand } from "./commands/review-profile-fit.js";
+import { createPdfCommand } from "./commands/generate-profile-pdf.js";
 
 const program = new Command();
 
@@ -23,5 +24,6 @@ program
 program.addCommand(createRunCommand());
 program.addCommand(createReviewCommand());
 program.addCommand(createInspectCommand());
+program.addCommand(createPdfCommand());
 
 program.parse(process.argv);

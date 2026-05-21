@@ -289,34 +289,25 @@ Jede Kombination aus Priorität (`hoch`/`mittel`/`niedrig`) und Coverage steuert
 
 **Ausgabe dieses Schritts**
 
-- `profile-draft.md`
-- `intermediate.yaml`
-- `diagnostics.yaml`
-- `llm-traces.yaml`
+- `profile-draft.yaml` (editierbares YAML, generierte Inhalte + Stammdaten)
+- `run-meta.yaml` (Pipeline-Metadaten + Diagnostics)
+- `llm-traces.yaml` (Prompt/Response-Traces)
 
 ## Welche Datei wofür da ist
 
-### `profile-draft.md`
+### `profile-draft.yaml`
 
-Der eigentliche Profilentwurf für die Ausschreibung.
+Das editierbare YAML-Profil – generierte Inhalte (Summary, Skills, Projekttexte) zuerst, dann Stammdaten. Wenn du Text anpassen möchtest (z. B. die Summary oder eine Projektbeschreibung), editierst du diese Datei und erzeugst dann das PDF neu.
 
-### `intermediate.yaml`
+### `run-meta.yaml`
 
-Die fachliche Herleitung des Laufs. Diese Datei ist wichtig, wenn du nachvollziehen willst:
-
-- welche Anforderungen erkannt wurden
-- wie die Requirements-Map Anforderungen priorisiert und belegt hat
-- welche Belege verwendet wurden
-- wie Projekte ausgewählt wurden
-- welche Abschnittslogik angewandt wurde
-
-### `diagnostics.yaml`
-
-Die Diagnose des Laufs. Diese Datei ist wichtig, wenn du wissen willst:
-
-- wo Belege fehlen
-- welche Aussagen schwach abgestützt sind
-- wo Nachschärfung sinnvoll ist
+**Fachliche Herleitung + Diagnose in einer Datei.** Enthält:
+- Requirements Map (Anforderungen, Priorität, Coverage, Evidenz)
+- Ausgewählte Keywords
+- Projekt-Ranking mit Begründungen
+- Kompositionsplan (Abschnitte + Modi)
+- Laufzeiten, LLM-Nutzung
+- Strukturelle Schwächen und Nachschärfungsvorschläge
 
 ### `llm-traces.yaml`
 
@@ -329,11 +320,10 @@ Die technischen Prompt-/Response-Traces. Diese Datei ist vor allem für tiefere 
 
 ## Wie du die Logik eines einzelnen Laufs nachvollziehst
 
-Wenn du verstehen willst, warum ein konkreter Entwurf so aussieht, ergibt sich diese Reihenfolge:
+Wenn du verstehen willst, warum ein konkreter Entwurf so aussieht:
 
-1. `profile-draft.md` lesen
-2. `diagnostics.yaml` auf Lücken und Warnhinweise prüfen
-3. `intermediate.yaml` für Anforderungen, Belege und Projektauswahl ansehen
+1. `profile-draft.yaml` lesen
+2. `run-meta.yaml` auf Lücken, Warnhinweise und fachliche Herleitung prüfen
 
 So lässt sich fachlich nachvollziehen:
 

@@ -7,9 +7,12 @@ workspace:
 
 pipeline:
   projectSelection:
-    targetCount: 5
+    targetCount: 4
   keywordSelection:
-    targetCount: 10
+    targetCount: 9
+
+pdf:
+  templatePath: "pdf-templates/profil-template.html"
 
 llm:
   provider: "openai-compatible"

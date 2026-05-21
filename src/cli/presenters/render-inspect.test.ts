@@ -38,7 +38,7 @@ describe("renderInspect", () => {
       structuralWeaknesses: [],
       refinementSuggestions: [],
       ambiguities: [],
-      outputRefs: { draftPath: "d", intermediatePath: "i", diagnosticsPath: "di", gapAnalysisPath: "g" },
+      outputRefs: { draftPath: "d", gapAnalysisPath: "g" },
     },
     projectRankings: [
       { rank: 1, id: "proj-1", title: "Projekt 1", rationale: "Beste Passung" },

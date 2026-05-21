@@ -7,11 +7,9 @@ import type { PipelineSuccess } from "../../core/pipeline/pipeline-result.js";
 export function renderRunSummary(result: PipelineSuccess): string {
   return [
     `✅ Run ${result.runId} completed successfully.`,
+    `  ${result.summary}`,
     ``,
-    `📄 Profile draft:  ${result.draftPath || "(not yet written)"}`,
-    `📋 Intermediate:   ${result.intermediatePath || "(not yet written)"}`,
-    `🔍 Diagnostics:    ${result.diagnosticsPath || "(not yet written)"}`,
-    ``,
-    result.summary,
+    `  📄 YAML:     ${result.draftPath || "(not yet written)"}`,
+    `  📋 Meta:     ${result.metaPath || "(not yet written)"}`,
   ].join("\n");
 }

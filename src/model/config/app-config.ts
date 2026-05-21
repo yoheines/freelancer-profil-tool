@@ -7,6 +7,7 @@ export interface AppConfig {
   workspace: WorkspaceConfig;
   pipeline: PipelineConfig;
   llm: LlmConfig;
+  pdf?: PdfConfig;
 }
 
 export interface WorkspaceConfig {
@@ -25,6 +26,10 @@ export interface ProjectSelectionConfig {
 
 export interface KeywordSelectionConfig {
   targetCount: number;
+}
+
+export interface PdfConfig {
+  templatePath: string;
 }
 
 export interface LlmConfig {

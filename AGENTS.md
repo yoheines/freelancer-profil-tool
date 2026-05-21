@@ -45,7 +45,7 @@ Deutsch. Sämtliche Prompts, Outputs, Code-Kommentare und Dokumentation auf Deut
 | 4 | rank-projects | LLM | `03-rank-projects-prompt.yaml` |
 | 5 | generate-profile-hook | LLM | `04-profile-hook-prompt.yaml` |
 | 6 | adapt-project-descriptions | LLM | `05-project-adaptation-prompt.yaml` |
-| 7 | compose-draft | rule-based | – |
+| 7 | compose-yaml | rule-based | – |
 | 8 | evaluate-diagnostics | rule-based | – |
 | 9 | persist-artifacts | rule-based | – |
 
@@ -57,7 +57,7 @@ Detaildiagramme: `docs/architecture.md`
 - **Model importiert nichts aus Core/Cli/Adapters** – reine Typdefinitionen
 - **Alle LLM-Calls über `createLlmClient()`** – kein direkter OpenAI-SDK-Zugriff
 - **Secrets getrennt** in `secrets/secrets.local.yaml` (nicht versioniert)
-- **Jeder Lauf erzeugt 4 Artefakte** in `runs/<run-id>/`
+- **Jeder Lauf erzeugt 3 Artefakte** in `runs/<run-id>/`: `profile-draft.yaml`, `run-meta.yaml`, `llm-traces.yaml`
 - **Rohe Ausschreibung als Primärinput:** Relevante LLM-Schritte arbeiten direkt mit dem Ausschreibungstext und optionalen Steering-Hinweisen.
 - **Requirements-Map als kompakter Zwischenvertrag:** Ein eigener LLM-Schritt bewertet Priorität, Coverage und Evidenztyp aller relevanten Anforderungen, zerlegt zusammengesetzte Anforderungen wenn nötig in atomare Einträge und steuert danach Keyword-Kuration, Ranking, Hook, Projektadaption und Run-Diagnostics.
 - **Rein LLM-basiertes Ranking:** Keine regelbasierte Evidenz-Kalkulation, keine Reserve-Klassifikation, kein `projectSelection.policy` mehr.
@@ -116,6 +116,7 @@ education:
 freelancer-profil-tool run       # Pipeline ausführen
 freelancer-profil-tool review    # Quellmaterial vorab prüfen
 freelancer-profil-tool inspect   # Ergebnisse inspizieren
+freelancer-profil-tool pdf       # PDF aus bestehendem Run generieren (ohne Pipeline-Neulauf)
 ```
 
 Flags `run`:
@@ -123,8 +124,8 @@ Flags `run`:
 - `-s, --sources <paths...>` – Quellen (kommasepariert oder mehrfach)
 - `-t, --steering <hints...>` – Steuerhinweise (optional)
 - `-c, --config <path>` – Config (optional, Default: config/default.yaml)
-- `--top-projects <n>` – Zielanzahl gerankter/adaptierter Projekte (optional, überschreibt Config)
 - `--language <de|en>` – Zielsprache des Profils (optional, Default: `de`)
+- `--pdf` – Zusätzlich PDF aus dem generierten Profil erzeugen
 
 Flags `review`:
 - identisch zu `run`
@@ -165,6 +166,54 @@ Alle LLM-Prompts liegen als YAML-Dateien in `prompts/` und werden zur Laufzeit g
 | `06-gap-analysis-prompt.yaml` | review | `{{GAP_ANALYSIS_JSON_SCHEMA}}`, `{{POSTING_TEXT}}`, `{{STEERING_HINTS_SECTION}}`, `{{SOURCE_DATA_JSON}}` |
 
 Jeder Nutzer kann die YAML-Dateien anpassen, um die Prompts auf sein Profil und seinen Stil zu optimieren, ohne den Code ändern zu müssen.
+
+## PDF-Generierung (HTML → Playwright → PDF)
+
+Zusätzlich zum Markdown-Draft kann die Pipeline ein pixelgenaues A4-PDF erzeugen.
+
+### Ablauf
+
+1. **HTML-Template** (`pdf-templates/profil-template.html`) wird mit `{{PLATZHALTERN}}` befüllt
+2. **Playwright** (Headless-Chromium) rendert das HTML als A4-PDF
+3. Die PDF landet als `profile-draft.pdf` neben dem Markdown-Draft im Run-Verzeichnis
+
+### Verzeichnisstruktur
+
+```
+pdf-templates/
+├── profil-template.html        # Vom Nutzer anpassbares HTML-Template mit CSS
+└── assets/portrait.png         # Portrait-Foto des Freelancers
+
+src/adapters/pdf/
+├── profile-pdf-data.ts         # TypeScript-Datenmodell (ProfilePdfData)
+├── render-profile-pdf.ts       # Template → Playwright → PDF
+├── extract-pdf-data.ts         # Extrahiert Daten aus bestehendem Run (YAML)
+└── write-profile-pdf.ts        # Schreibt PDF-Datei
+```
+
+### Nutzung
+
+```bash
+# Direkt nach dem Pipeline-Lauf
+npx tsx src/cli/cli.ts run -p posting.txt -s profil.yaml -s projekte.yaml --pdf
+
+# Nachträglich für einen bestehenden Run
+npx tsx src/cli/cli.ts pdf <run-id>
+```
+
+### Konfiguration
+
+```yaml
+# config/default.yaml
+pdf:
+  templatePath: "pdf-templates/profil-template.html"   # Pfad zum HTML-Template
+```
+
+Das HTML-Template verwendet **Handlebars** als Template-Engine. Schleifen (`{{#each projects}}`) und Bedingungen (`{{#ifPositive certifications}}`) werden direkt im HTML ausgewertet – kein TypeScript-Code nötig für Layout-Änderungen. Für das Portrait-Bild muss `pdf-templates/assets/portrait.png` aktualisiert werden. Details zum Datenmodell und eine Prompt-Vorlage zum Generieren/Anpassen des Templates per LLM findest du in `docs/user-guide.md`.
+
+
+
+Die Anzahl Projekte und Keywords wird **ausschließlich über die Config** gesteuert (`pipeline.projectSelection.targetCount`, `pipeline.keywordSelection.targetCount`) – es gibt keine CLI-Overrides mehr.
 
 ## Verwandte Dokumente
 

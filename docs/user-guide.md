@@ -10,7 +10,7 @@ Vom ersten Setup bis zum fertigen Profilentwurf – alle Schritte im Überblick.
 |---|---|
 | **Node.js 18+** | `node --version` prüfen |
 | **npm** | `npm --version` prüfen |
-| **API-Key** | Kompatibler OpenAI-Endpoint (z. B. Crof AI, OpenAI, Azure, Ollama) |
+| **API-Key** | Kompatibler OpenAI-Endpoint (z. B. OpenAI, Azure, Ollama) |
 | **Profil + Projekte** | Dein CV, deine Projekthistorie (PDF, DOCX oder als Text) |
 
 ## 2. Installation und Einrichtung
@@ -51,7 +51,7 @@ pipeline:
   projectSelection:
     targetCount: 5                     # Anzahl Projekte im Profil
   keywordSelection:
-    targetCount: 15                    # Anzahl Keywords
+    targetCount: 10                    # Anzahl Keywords
 ```
 
 Passe `baseURL` und `model` an deinen API-Provider an.
@@ -333,7 +333,6 @@ npx tsx src/cli/cli.ts run \
   -p sources/ausschreibungen/product-owner.txt \
   -s sources/profil.yaml \
   -s sources/projekte.yaml \
-  --top-projects 5 \
   --language de
 ```
 
@@ -345,8 +344,8 @@ npx tsx src/cli/cli.ts run \
 | `-s, --sources` | Quellen (Profil + Projekte, mehrfach oder kommasepariert) | – |
 | `-t, --steering` | Optionale Steuerhinweise für den Lauf | – |
 | `-c, --config` | Pfad zur Config-Datei | `config/default.yaml` |
-| `--top-projects` | Anzahl Projekte im Profil | aus Config |
 | `--language` | Zielsprache (`de` oder `en`) | `de` |
+| `--pdf` | Zusätzlich PDF aus dem Profil erzeugen | – |
 
 **Zielsprache einstellen:**
 
@@ -365,50 +364,109 @@ npx tsx src/cli/cli.ts run \
 -t "Stärker auf Führungserfahrung eingehen" -t "Budgetverantwortung betonen"
 ```
 
+### 8.1 PDF-Generierung
+
+Zusätzlich zum Markdown-Entwurf kann ein PDF erzeugt werden.
+
+```bash
+# Direkt nach dem Pipeline-Lauf
+npx tsx src/cli/cli.ts run -p posting.txt -s profil.yaml -s projekte.yaml --pdf
+
+# Nachträglich für einen bestehenden Run (ohne Neulauf)
+npx tsx src/cli/cli.ts pdf <run-id>
+```
+
+Das HTML-Template liegt standardmäßig in `pdf-templates/profil-template.html` und verwendet **Handlebars** als Template-Engine – Schleifen, Bedingungen und Variablen werden direkt im HTML ausgewertet, kein TypeScript-Eingriff nötig.
+
+Die Anzahl Projekte und Keywords wird in der Config gesteuert – siehe `config/default.yaml`:
+- `pipeline.projectSelection.targetCount` (Projekte)
+- `pipeline.keywordSelection.targetCount` (Keywords)
+
+#### Prompt-Vorlage: Template generieren/anpassen per LLM
+
+Wenn du das Template von einem LLM (z. B. ChatGPT, Claude) generieren oder anpassen lassen möchtest, kopiere folgenden Prompt:
+
+> Erstelle ein HTML-Template für ein Freelancer-Profil als A4-PDF (210 mm × 297 mm). Das Template verwendet **Handlebars** als Template-Engine – kein TypeScript, alles wird im HTML gerendert.
+>
+> **Verfügbare Datenvariablen (alle von Handlebars escaped):**
+>
+> | Variable | Typ | Beschreibung |
+> |---|---|---|
+> | `{{name}}` | string | Name des Freelancers |
+> | `{{title}}` | string | Berufsbezeichnung |
+> | `{{tagline}}` | string | Kurzer Untertitel |
+> | `{{email}}` | string | E-Mail |
+> | `{{phone}}` | string | Telefon |
+> | `{{location}}` | string | Standort |
+> | `{{availabilityText}}` | string | Verfügbarkeit (z. B. "ab 09/2026 · bis zu 100% · bis zu 100%") |
+> | `{{summary}}` | string | Executive Summary |
+> | `{{portraitPath}}` | string | Datei-Pfad zum Portrait-Foto (für `<img src>`) |
+> | `{{skills}}` | string[] | Liste der Skill-Keywords |
+> | `{{projects}}` | PdfProject[] | Liste der Projekte (siehe unten) |
+> | `{{certifications}}` | string[] | Zertifizierungen |
+> | `{{education}}` | PdfEducation[] | Ausbildung (siehe unten) |
+> | `{{languages}}` | PdfLanguage[] | Sprachen (siehe unten) |
+>
+> **PdfProject** – jedes Objekt hat:
+> - `{{title}}` – Projekttitel
+> - `{{client}}` – Auftraggeber
+> - `{{branch}}` – Branche
+> - `{{period}}` – Zeitraum
+> - `{{desc}}` – Projektbeschreibung
+>
+> **PdfEducation** – jedes Objekt hat:
+> - `{{degree}}` – Abschluss
+> - `{{institution}}` – Hochschule
+> - `{{period}}` – Zeitraum
+>
+> **PdfLanguage** – jedes Objekt hat:
+> - `{{lang}}` – Sprache
+> - `{{level}}` – Niveau
+>
+> **Handlebars-Helper (zusätzlich zu den Built-ins):**
+> - `{{#ifPositive <array>}}...{{/ifPositive}}` – Block nur rendern, wenn das Array nicht leer ist
+> - `{{join <array> "<trennzeichen>"}}` – Array-Elemente mit Trennzeichen verbinden (funktioniert nur für `string[]`, z. B. `{{join certifications " · "}}`)
+> - Für Objekt-Arrays (z. B. `languages`, `projects`, `education`) mit `{{#each}}` iterieren und Felder direkt referenzieren, z. B. `{{#each languages}}{{lang}}: {{level}}{{#unless @last}} · {{/unless}}{{/each}}`
+> - Alle Standard-Handlebars-Helper wie `{{#each}}`, `{{#if}}`, `{{#unless}}` funktionieren
+>
+> **Anforderungen an das Layout:**
+> - Exaktes A4-Format: 210 mm × 297 mm
+> - `@page { size: A4; margin: 0; }` im CSS
+> - `.page { width: 210mm; height: 297mm; overflow: hidden; position: relative; }` als Container
+> - Das HTML muss eigenständig funktionieren – keine externen Stylesheets, keine externen Fonts
+> - `-webkit-print-color-adjust: exact; print-color-adjust: exact;` für zuverlässige Farben im PDF
+> - Wähle ein professionelles, klares Farbschema, Schriftarten und Layout selbstständig (z. B. Blau- oder Grautöne, serifenlose Schrift, Portrait links + Kontaktdaten daneben, Skills als Raster, Projekte mit farbigem Rand)
+
 ---
 
 ## 9. Generierte Dateien prüfen
 
 Nach erfolgreichem Lauf liegen alle Ergebnisse in `runs/<run-id>/`:
 
-### `profile-draft.md`
+### `profile-draft.yaml`
 
-**Der generierte Profilentwurf** – das Hauptprodukt. Enthält:
-- Keywords am Anfang des Dokuments
-- Einleitung (aus Schritt 5)
-- Adaptierte Projektbeschreibungen
-- Qualifikationen (Skills, Zertifikate, Sprachen, Ausbildung, Karrierestationen)
-- Kontaktdaten
+**Das editierbare YAML-Profil** – generierte Inhalte (Summary, Skills, Projekttexte) zuerst, dann Stammdaten. Dies ist die Datei, die du bearbeiten kannst, bevor du daraus ein PDF erzeugst. Wird sowohl von der Pipeline als auch vom `pdf`-Befehl gelesen.
 
 **Prüfe:**
 - Klingt die Einleitung authentisch und passend zur Ausschreibung?
 - Sind die Projektbeschreibungen korrekt (keine erfundenen Fakten)?
 - Fehlen wichtige Aspekte, die im Profil vorhanden sind, aber nicht im Entwurf auftauchen?
 
-### `intermediate.yaml`
+### `run-meta.yaml`
 
-**Die fachliche Herleitung des Laufs.** Zeigt:
+**Die fachliche Herleitung des Laufs + Diagnose in einer Datei.** Zeigt:
 - Welche Anforderungen erkannt wurden (Requirements Map mit Priorität, Coverage, Evidenz)
 - Welche Keywords ausgewählt wurden
 - Wie die Projekte gerankt sind (mit Begründungen)
 - Welcher Kompositionsplan (Abschnitte + Modi) angewandt wurde
+- Laufzeiten, LLM-Nutzung
+- Strukturelle Schwächen und Nachschärfungsvorschläge
 
 **Prüfe:**
 - Wurden alle wichtigen Anforderungen erkannt?
 - Ist die Priorisierung nachvollziehbar?
 - Sind die richtigen Projekte ausgewählt?
-
-### `diagnostics.yaml`
-
-**Diagnose und Nachschärfungsvorschläge.** Enthält:
-- Laufzeiten und LLM-Nutzung
-- Strukturelle Schwächen (schwach gestützte und unbelegte Anforderungen)
-- Konkrete Nachschärfungsvorschläge (z. B. "vorhandene Evidenz expliziter ausformulieren")
-- Zusammensetzung des Entwurfs (Anzahl generierter/adaptierter/statischer Abschnitte)
-
-**Prüfe:**
 - Welche Anforderungen sind nur schwach gestützt? Kannst du die Evidenz verbessern?
-- Sind `warnings` dabei? Das sind echte Lücken, die du vor dem nächsten Lauf schließen solltest.
 
 ### `llm-traces.yaml`
 
@@ -427,10 +485,10 @@ Die Gap-Analyse – nur verfügbar, wenn du zuvor `npx tsx src/cli/cli.ts review
 
 ## 10. Ergebnisse inspizieren (CLI)
 
-Das `inspect`-Kommando zeigt die wichtigsten Metadaten eines abgeschlossenen Laufs:
+Das `inspect`-Kommando zeigt die wichtigsten Metadaten eines abgeschlossenen Laufs (aus `run-meta.yaml`):
 
 ```bash
-npx tsx src/cli/cli.ts inspect 20260517-ca5159
+npx tsx src/cli/cli.ts inspect 20260521-3810ca
 ```
 
 Es zeigt:
@@ -484,11 +542,10 @@ npx tsx src/cli/cli.ts run \
   -p sources/ausschreibungen/product-owner.txt \
   -s sources/profil.yaml \
   -s sources/projekte.yaml \
-  --top-projects 5 \
   --language de
 
 # 6. Ergebnis prüfen
-cat runs/*/profile-draft.md
+cat runs/*/profile-draft.yaml
 ```
 
 ---

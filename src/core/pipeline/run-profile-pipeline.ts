@@ -15,9 +15,9 @@ import { loadRunInputs } from "./steps/load-run-inputs.js";
 import { planDocumentComposition } from "./steps/plan-document-composition.js";
 import { generateProfileHook } from "./steps/generate-profile-hook.js";
 import { adaptProjectDescriptions } from "./steps/adapt-project-descriptions.js";
-import { composeProfileDraft } from "./steps/compose-profile-draft.js";
+import { composeProfileYaml } from "./steps/compose-profile-draft.js";
 import { evaluateDraftDiagnostics } from "./steps/evaluate-draft-diagnostics.js";
-import { ensureRunDir, writeIntermediateModel, writeProfileDraft, writeDiagnostics } from "../../adapters/filesystem/write-run-artifacts.js";
+import { ensureRunDir, writeProfileDraft, writeRunMeta } from "../../adapters/filesystem/write-run-artifacts.js";
 import { loadSourceDocuments } from "../../adapters/filesystem/load-source-documents.js";
 import { curateSkillKeywords } from "./steps/curate-skill-keywords.js";
 import { analyzeRequirementsCoverage } from "./steps/analyze-requirements-coverage.js";
@@ -194,44 +194,42 @@ export async function runProfilePipeline(
       }
     }
 
-    // Step 7: Compose draft (deterministic)
+    // Step 7: Compose YAML (deterministic)
     const t5 = Date.now();
-    const draft = composeProfileDraft(adaptedSections, composition, skillKeywords, loadedInputs.targetLanguage);
-    stepTimings.push({ name: "compose-draft", durationMs: Date.now() - t5, status: "ok" });
+    const yamlData = composeProfileYaml(
+      adaptedSections, skillKeywords, sources, hookText, projectRankings, loadedInputs.targetLanguage,
+    );
+    stepTimings.push({ name: "compose-yaml", durationMs: Date.now() - t5, status: "ok" });
 
     // Step 8: Persist artifacts
     const t6 = Date.now();
     await ensureRunDir(runDir);
 
-    const draftPath = await writeProfileDraft(runDir, draft);
-    const intermediatePath = await writeIntermediateModel(runDir, {
-      compositionPlan: composition,
-      requirementsMap: requirementsMap.entries,
-      skillKeywords,
-      projectRankings,
+    const yamlPath = await writeProfileDraft(runDir, yamlData);
+
+    const metaPath = await writeRunMeta(runDir, {
+      runId,
+      createdAt: new Date().toISOString(),
       inputs: {
         postingPath: loadedInputs.postingPath,
         sourcePaths: loadedInputs.sourcePaths,
         steeringHints: loadedInputs.steeringHints,
         targetLanguage: loadedInputs.targetLanguage,
       },
-    });
-
-    // Build diagnostics separately to avoid TDZ issues with circular ref
-    const diagnostics = evaluateDraftDiagnostics({
-      composition,
-      draft,
-      stepTimings,
-      llmTokens: totalLlmTokens,
-      llmCalls: totalLlmCalls,
-      requirementsMap,
+      compositionPlan: composition,
+      requirementsMap: requirementsMap.entries,
+      skillKeywords,
       projectRankings,
-      outputRefs: { draftPath, intermediatePath, diagnosticsPath: "" },
+      diagnostics: evaluateDraftDiagnostics({
+        composition,
+        stepTimings,
+        llmTokens: totalLlmTokens,
+        llmCalls: totalLlmCalls,
+        requirementsMap,
+        projectRankings,
+        outputRefs: { draftPath: yamlPath },
+      }),
     });
-    let diagnosticsPath = await writeDiagnostics(runDir, diagnostics);
-    // Patch diagnostics with real path and re-write
-    diagnostics.outputRefs.diagnosticsPath = diagnosticsPath;
-    diagnosticsPath = await writeDiagnostics(runDir, diagnostics);
 
     stepTimings.push({ name: "persist-artifacts", durationMs: Date.now() - t6, status: "ok" });
 
@@ -240,9 +238,8 @@ export async function runProfilePipeline(
     return {
       ok: true,
       runId,
-      draftPath,
-      intermediatePath,
-      diagnosticsPath,
+      draftPath: yamlPath,
+      metaPath,
       summary: `Pipeline completed in ${(totalDuration / 1000).toFixed(1)}s with ${totalLlmCalls} LLM calls.`,
     };
   } catch (err) {

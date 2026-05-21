@@ -123,7 +123,7 @@ Legende: 🧠 = LLM-Call (blau) · Deterministische Schritte (violett)
 | 7 | adapt-project-descriptions | LLM | 5 | Gerankte Projekte + Ausschreibung + Requirements-Map | Adaptierte Projekttexte |
 | 8 | compose-draft | deterministisch | – | Alle Sections | Markdown-Dokument |
 | 9 | evaluate-diagnostics | deterministisch | – | Draft + Metadaten | Diagnostics |
-| 10 | persist-artifacts | deterministisch | – | Alle Daten | 4 Run-Dateien |
+| 10 | persist-artifacts | deterministisch | – | Alle Daten | profile-draft.yaml + .md + run-meta.yaml + llm-traces.yaml |
 
 Hinweis: `adapt-project-descriptions` zählt als **ein** LLM-Call (Batch). Die Pipeline hat damit insgesamt **5 LLM-Calls**.
 
@@ -147,7 +147,7 @@ flowchart TB
         PROJECTS["projekte.yaml<br/>(bis zu 19 Projekte<br/>mit Beschreibung, Skills)"]
     end
 
-    subgraph INTERMEDIATE["Zwischenmodell (intermediate.yaml)"]
+    subgraph META["Lauf-Metadaten (run-meta.yaml)"]
         COMP["compositionPlan"]
         REQ["requirementsMap"]
         KW["skillKeywords"]
@@ -156,7 +156,7 @@ flowchart TB
 
     subgraph OUTPUTS["Ausgabe-Dateien"]
         DRAFT["profile-draft.md"]
-        DIAG["diagnostics.yaml"]
+        YAML["profile-draft.yaml"]
     end
 
     REQ -->|"curate-keywords"| KW
@@ -168,11 +168,11 @@ flowchart TB
 
     COMP -->|"compose-draft"| DRAFT
     REQ -->|"generate-hook / adapt-projects"| DRAFT
-    REQ -->|"diagnostics"| DIAG
+    REQ -->|"diagnostics"| META
     KW -->|"compose-draft"| DRAFT
     RANK -->|"compose-draft"| DRAFT
 
-    COMP -->|"diagnostics"| DIAG
+    COMP -->|"diagnostics"| META
 ```
 
 ---
@@ -241,8 +241,7 @@ flowchart LR
     REVIEW -->|"-t/--steering"| STEER
     REVIEW -->|"-c/--config"| CFG
 
-    INSPECT -->|"Liest"| IYAML["runs/&lt;run-id>/intermediate.yaml"]
-    INSPECT -->|"Liest"| IDIAG["runs/&lt;run-id>/diagnostics.yaml"]
+    INSPECT -->|"Liest"| META["runs/&lt;run-id>/run-meta.yaml"]
 ```
 
 ---
@@ -251,10 +250,9 @@ flowchart LR
 
 ```
 runs/
-├── <run-id>/                  # Eindeutige Lauf-ID (z. B. 20260516-3f830f)
-│   ├── profile-draft.md       # Generierter Profilentwurf (Markdown)
-│   ├── intermediate.yaml      # Strukturiertes Zwischenmodell
-│   ├── diagnostics.yaml       # Lauf-Diagnostik + Metriken
+├── <run-id/>                  # Eindeutige Lauf-ID (z. B. 20260521-3810ca)
+│   ├── profile-draft.yaml     # Editierbares YAML-Profil (generiert + Stammdaten)
+│   ├── run-meta.yaml          # Pipeline-Metadaten + Diagnostics
 │   └── llm-traces.yaml        # Prompt/Response pro LLM-Call
 │
 ├── <review-run-id>/           # Review-Lauf (gleiches ID-Format)

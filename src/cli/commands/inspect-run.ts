@@ -33,24 +33,17 @@ export function createInspectCommand(): Command {
 }
 
 async function loadRunData(runId: string): Promise<InspectData> {
-  const runsDir = RUNS_DIR;
-  const intermediatePath = `${runsDir}/${runId}/intermediate.yaml`;
-  const diagnosticsPath = `${runsDir}/${runId}/diagnostics.yaml`;
-
-  const [intermediateRaw, diagnosticsRaw] = await Promise.all([
-    readFile(intermediatePath, "utf-8"),
-    readFile(diagnosticsPath, "utf-8"),
-  ]);
-
-  const intermediate = parse(intermediateRaw) as Record<string, unknown>;
-  const diagnostics = parse(diagnosticsRaw) as RunDiagnostic;
+  const metaPath = `${RUNS_DIR}/${runId}/run-meta.yaml`;
+  const raw = await readFile(metaPath, "utf-8");
+  const meta = parse(raw) as Record<string, unknown>;
+  const diagnostics = meta.diagnostics as RunDiagnostic;
 
   return {
     runId,
-    composition: intermediate.compositionPlan as ProfileCompositionDecision,
+    composition: meta.compositionPlan as ProfileCompositionDecision,
     diagnostics,
-    requirementsMap: intermediate.requirementsMap as RequirementsMapEntry[] | undefined,
-    projectRankings: intermediate.projectRankings as InspectData["projectRankings"],
-    gapAnalysis: intermediate.gapAnalysis as ProfileGapAnalysis | undefined,
+    requirementsMap: meta.requirementsMap as RequirementsMapEntry[] | undefined,
+    projectRankings: meta.projectRankings as InspectData["projectRankings"],
+    gapAnalysis: meta.gapAnalysis as ProfileGapAnalysis | undefined,
   };
 }

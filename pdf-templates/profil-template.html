@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{name}} - Profil</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 0;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: #f3f3f3;
+    }
+
+    body {
+      font-family: Aptos, Calibri, "Segoe UI", Arial, sans-serif;
+      color: #161616;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .page {
+      position: relative;
+      width: 210mm;
+      height: 297mm;
+      margin: 0 auto;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .top-rule {
+      position: absolute;
+      left: 22mm;
+      top: 18.8mm;
+      width: 166mm;
+      height: 1.2mm;
+      background: #1f5d77;
+    }
+
+    .portrait {
+      position: absolute;
+      left: 25.2mm;
+      top: 28.0mm;
+      width: 42.3mm;
+      height: 51.0mm;
+      object-fit: cover;
+      display: block;
+    }
+
+    .header {
+      position: absolute;
+      left: 75.0mm;
+      top: 27.4mm;
+      width: 112.5mm;
+    }
+
+    h1 {
+      margin: 0 0 2.2mm;
+      font-size: 18pt;
+      line-height: 1.02;
+      font-weight: 700;
+      letter-spacing: 0;
+      color: #050505;
+    }
+
+    .role {
+      margin: 0 0 1.7mm;
+      font-size: 12.4pt;
+      line-height: 1.08;
+      font-weight: 700;
+      color: #050505;
+    }
+
+    .tagline {
+      margin: 0;
+      font-size: 11.5pt;
+      line-height: 1.2;
+      font-weight: 400;
+    }
+
+    .contact {
+      margin-top: 7.3mm;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 8mm;
+      row-gap: 1.5mm;
+      font-size: 9.85pt;
+      line-height: 1.24;
+    }
+
+    .contact-row {
+      min-width: 0;
+    }
+
+    .contact strong {
+      display: block;
+      margin-bottom: 0.25mm;
+      font-size: 8.25pt;
+      line-height: 1.1;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #1f5d77;
+    }
+
+    .availability {
+      grid-column: 1 / -1;
+      padding-top: 0.9mm;
+      border-top: 0.25mm solid #d5e2e8;
+    }
+
+    a {
+      color: #0563c1;
+      text-decoration: underline;
+      text-underline-offset: 1px;
+    }
+
+    main {
+      position: absolute;
+      left: 22.0mm;
+      top: 89.4mm;
+      width: 166.0mm;
+      font-size: 9.75pt;
+      line-height: 1.28;
+    }
+
+    section {
+      margin: 0 0 5.3mm;
+    }
+
+    .section-title {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 3.2mm;
+      align-items: center;
+      margin: 0 0 2.0mm;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 10.6pt;
+      line-height: 1;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      color: #050505;
+    }
+
+    .section-title::after {
+      content: "";
+      height: 0.25mm;
+      background: #d5e2e8;
+    }
+
+    h3 {
+      margin: 0 0 1.0mm;
+      font-size: 10.2pt;
+      line-height: 1.15;
+      font-weight: 700;
+      color: #050505;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    .profile-text {
+      max-width: 158mm;
+      font-size: 10.0pt;
+      line-height: 1.31;
+    }
+
+    .skills-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      column-gap: 6.5mm;
+      row-gap: 1.3mm;
+      margin-top: 0.4mm;
+    }
+
+    .skill {
+      position: relative;
+      padding-left: 3.8mm;
+      font-size: 9.45pt;
+      line-height: 1.22;
+    }
+
+    .skill::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.47em;
+      width: 1.4mm;
+      height: 1.4mm;
+      background: #1f5d77;
+    }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      row-gap: 3.0mm;
+      align-items: start;
+    }
+
+    .project {
+      padding: 2.7mm 3.8mm 2.9mm;
+      border-left: 1.15mm solid #1f5d77;
+      background: #f7fafb;
+      break-inside: avoid;
+    }
+
+    .meta {
+      margin: 0 0 1.1mm;
+      font-size: 8.8pt;
+      line-height: 1.26;
+      color: #373737;
+    }
+
+    .meta strong {
+      font-weight: 700;
+      color: #161616;
+    }
+
+    .project p {
+      font-size: 9.25pt;
+      line-height: 1.24;
+    }
+
+    .qual-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      row-gap: 1.7mm;
+      padding-top: 0.2mm;
+    }
+
+    .qual-row {
+      display: grid;
+      grid-template-columns: 31mm 1fr;
+      column-gap: 4.5mm;
+      align-items: start;
+      padding-top: 1.3mm;
+      border-top: 0.25mm solid #e4ecef;
+    }
+
+    .qual-row:first-child {
+      padding-top: 0;
+      border-top: 0;
+    }
+
+    .qual-row h3 {
+      margin: 0;
+      font-size: 9.55pt;
+      line-height: 1.18;
+      text-transform: none;
+    }
+
+    .qual-text {
+      font-size: 9.25pt;
+      line-height: 1.25;
+    }
+
+    ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    li {
+      position: relative;
+      margin: 0 0 0.45mm;
+      padding-left: 4.6mm;
+      line-height: 1.23;
+      font-size: 9.05pt;
+    }
+
+    li::before {
+      content: "•";
+      position: absolute;
+      left: 1.05mm;
+      top: -0.05em;
+      font-size: 9.4pt;
+      line-height: 1.1;
+      color: #1f5d77;
+    }
+
+    .nowrap {
+      white-space: nowrap;
+    }
+
+    @media print {
+      html,
+      body {
+        width: 210mm;
+        height: 297mm;
+        background: #fff;
+      }
+
+      .page {
+        margin: 0;
+        break-after: avoid;
+        page-break-after: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <article class="page">
+    <div class="top-rule"></div>
+    <img class="portrait" src="{{portraitPath}}" alt="Portrait {{name}}">
+
+    <header class="header">
+      <h1>{{name}}</h1>
+      <p class="role">{{title}}</p>
+      <p class="tagline">{{tagline}}</p>
+
+      <div class="contact">
+        <div class="contact-row">
+          <strong>Kontakt</strong>
+          <span><a href="mailto:{{email}}">{{email}}</a><br><span class="nowrap">{{phone}}</span></span>
+        </div>
+        <div class="contact-row">
+          <strong>Standort</strong>
+          <span>{{location}}</span>
+        </div>
+        <div class="contact-row availability">
+          <strong>Verfügbar</strong>
+          <span>{{availabilityText}}</span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section>
+        <div class="section-title"><h2>Profil</h2></div>
+        <p class="profile-text">{{summary}}</p>
+      </section>
+
+      <section>
+        <div class="section-title"><h2>Skills</h2></div>
+        <div class="skills-list" aria-label="Skills">
+          {{#each skills}}
+          <div class="skill">{{this}}</div>
+          {{/each}}
+        </div>
+      </section>
+
+      <section>
+        <div class="section-title"><h2>Ausgewählte Projekte</h2></div>
+        <div class="projects-grid">
+          {{#each projects}}
+          <article class="project">
+            <h3>{{title}}</h3>
+            <p class="meta"><strong>Auftraggeber:</strong> {{client}} · <strong>Branche:</strong> {{branch}} · <strong>Zeitraum:</strong> {{period}}</p>
+            <p>{{desc}}</p>
+          </article>
+          {{/each}}
+        </div>
+      </section>
+
+      <section>
+        <div class="section-title"><h2>Qualifikationen</h2></div>
+        <div class="qual-grid">
+          {{#ifPositive certifications}}
+          <div class="qual-row">
+            <h3>Zertifizierungen</h3>
+            <p class="qual-text">{{join certifications " · "}}</p>
+          </div>
+          {{/ifPositive}}
+          {{#each education}}
+          <div class="qual-row">
+            <h3>Ausbildung</h3>
+            <p class="qual-text">{{degree}} · {{institution}} · {{period}}</p>
+          </div>
+          {{/each}}
+          {{#ifPositive languages}}
+          <div class="qual-row">
+            <h3>Sprachkenntnisse</h3>
+            <p class="qual-text">{{#each languages}}{{lang}}: {{level}}{{#unless @last}} · {{/unless}}{{/each}}</p>
+          </div>
+          {{/ifPositive}}
+        </div>
+      </section>
+    </main>
+  </article>
+</body>
+</html>

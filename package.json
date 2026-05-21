@@ -18,13 +18,16 @@
   "type": "module",
   "dependencies": {
     "commander": "^14.0.3",
+    "handlebars": "^4.7.9",
     "openai": "^6.37.0",
     "pdf-parse": "^2.4.5",
     "yaml": "^2.9.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@types/handlebars": "^4.0.40",
     "@types/node": "^25.7.0",
+    "playwright": "^1.60.0",
     "tsx": "^4.21.1",
     "typescript": "^6.0.3",
     "vitest": "^4.1.6"
