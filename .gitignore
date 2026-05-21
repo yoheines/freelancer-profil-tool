@@ -5,3 +5,4 @@ secrets/
 sources/
 .env
 *.local.yaml
+pdf-templates/assets/portrait.png
