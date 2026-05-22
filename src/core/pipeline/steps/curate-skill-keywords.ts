@@ -7,11 +7,11 @@
  */
 
 import type { PipelineContext } from "../pipeline-context.js";
-import type { SourceDocument } from "../../../model/input/job-posting-input.js";
+import type { ProfileSkill, SourceDocument } from "../../../model/input/job-posting-input.js";
 import type { RequirementsMap } from "../../../model/coverage/requirements-map.js";
 import { createLlmClient } from "../../../adapters/llm/openai-compatible-client.js";
 import { loadPromptTemplate, fillTemplate } from "../../../adapters/llm/prompt-builder/load-prompt-template.js";
-import { buildRequirementsMapEntries, buildSteeringHintsSection } from "../../../adapters/llm/prompt-builder/prompt-sections.js";
+import { buildRequirementsMapEntries, buildSkillRatingsSection, buildSteeringHintsSection } from "../../../adapters/llm/prompt-builder/prompt-sections.js";
 import { trimMarkdownBlock } from "../../../shared/text/trim-markdown-block.js";
 
 interface ProjectEntry {
@@ -20,7 +20,7 @@ interface ProjectEntry {
 }
 
 interface ProfileEntry {
-  skills?: Array<{ name?: string }>;
+  skills?: ProfileSkill[];
   languages?: Array<{ language?: string; level?: string }>;
 }
 
@@ -76,6 +76,7 @@ export async function curateSkillKeywords(
 
   const systemPrompt = fillTemplate(template.system_prompt, {
     REQUIREMENTS_MAP_ENTRIES: buildRequirementsMapEntries(requirementsMap),
+    SKILL_RATINGS_SECTION: buildSkillRatingsSection(sources),
     TARGET_COUNT: String(keywordTargetCount),
   });
   const userPrompt = fillTemplate(template.user_prompt, {

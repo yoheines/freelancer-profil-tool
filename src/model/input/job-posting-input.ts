@@ -15,6 +15,21 @@ export interface ProfileSourceInput {
   [key: string]: any;
 }
 
+/**
+ * Vertrautheits-Rating für Profil-Skills.
+ * Dient als weicher Kontext für Coverage-Analyse und Keyword-Kuration.
+ * Wird NICHT im finalen Profil ausgegeben.
+ */
+export type SkillRating = "high" | "medium" | "low";
+
+/**
+ * Ein Skill im Quell-Profil mit optionalem Vertrautheits-Rating.
+ */
+export interface ProfileSkill {
+  name: string;
+  rating?: SkillRating;
+}
+
 export interface ProjectHistoryInput {
   /** List of past projects with descriptions */
   projects: ProjectEntry[];

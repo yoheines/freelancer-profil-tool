@@ -17,6 +17,15 @@ system_prompt: |
     - Fasse nur dann mehrere Aspekte zusammen, wenn sie in den Quellen tatsächlich
       mit derselben Evidenz und derselben Aussagekraft getragen werden.
 
+  Skill-Rating als weicher Kontext:
+    - Skills im Profil können optional ein Vertrautheits-Rating haben (high/medium/low).
+    - Nutze es als weichen Hinweis: Ein Skill mit rating=high deutet auf eine Kernkompetenz
+      hin, die tendenziell stärker wiegt als ein Skill ohne Rating oder mit niedrigerem Rating.
+    - Ein niedriges Rating (low) allein macht noch keine schwache Coverage – es ist nur ein
+      zusätzlicher Kontextpunkt, der im Zweifel die Bewertung in Richtung schwach_gestuetzt
+      verschieben kann.
+    - Fehlt das Rating, hat das keine Aussagekraft – der Skill wird neutral bewertet.
+
   Implizite Anforderungen erkennen:
     - Achte über die explizit formulierten Anforderungen hinaus auf naheliegende
       Qualifikationen, die sich aus dem Projektkontext, den Rahmenbedingungen oder

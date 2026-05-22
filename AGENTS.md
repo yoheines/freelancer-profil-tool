@@ -51,6 +51,30 @@ Deutsch. Sämtliche Prompts, Outputs, Code-Kommentare und Dokumentation auf Deut
 
 Detaildiagramme: `docs/architecture.md`
 
+## Skill-Rating (Vertrautheit)
+
+Skills im Quell-Profil können ein optionales `rating`-Feld (`high`, `medium`, `low`) erhalten,
+das die Vertrautheit/Erfahrungstiefe des Freelancers in diesem Skill angibt.
+
+**Wirkung:**
+- **Coverage-Analyse (Schritt 1):** Der LLM erhält das Rating als weichen Kontext in
+  `{{SOURCE_DATA_JSON}}`. Ein `rating: "high"` kann die Coverage-Bewertung positiv beeinflussen,
+  ein `rating: "low"` kann sie tendenziell dämpfen – es gibt keine feste Regel, der LLM
+  entscheidet autonom.
+- **Keyword-Kuration (Schritt 2):** Der Prompt enthält einen zusätzlichen Block
+  `{{SKILL_RATINGS_SECTION}}`, der die Ratings auflistet. Der LLM kann Skills mit hohem Rating
+  bei der Priorisierung stärker gewichten.
+- **Gap-Analyse (Review):** Wirkt via denselben `{{ANALYSE_GRUNDSAETZE}}`-Mechanismus wie
+  die Coverage-Analyse.
+
+**Keine Wirkung auf:**
+- Finales Profil (YAML-Draft, PDF) – `skills: string[]` bleibt flach
+- Projekt-Ranking, Profil-Hook, Projekt-Adaption – hier wirkt das Rating nur indirekt
+  über die Requirements-Map
+
+Typdefinition: `ProfileSkill` (`name: string`, `rating?: "high" | "medium" | "low"`) in
+`src/model/input/job-posting-input.ts`.
+
 ## Wichtige Architekturregeln
 
 - **Strikte Schichtentrennung:** `src/core/`, `src/model/`, `src/adapters/`, `src/cli/`
@@ -86,7 +110,10 @@ capacity: "bis zu 100%"            # Auslastung
 onsiteWillingness: "bis zu 100%"    # Onsite-Bereitschaft
 summary: "..."                      # Executive Summary
 skills:
-  - name: "Skill-Name"
+  - name: "Skill-Name"           # Pflicht
+    rating: "high"               # Optional: Vertrautheit (high/medium/low) – dient als
+                                 # weicher Kontext für Coverage-Analyse und Keyword-Kuration,
+                                 # wird NICHT im finalen Profil ausgegeben
   - name: "Nächster Skill"
 certifications:
   - "Zertifikatsname"
@@ -159,7 +186,7 @@ Alle LLM-Prompts liegen als YAML-Dateien in `prompts/` und werden zur Laufzeit g
 | Datei | Schritt | Platzhalter |
 |---|---|---|
 | `01-requirements-map-prompt.yaml` | analyze-requirements-coverage | `{{JSON_SCHEMA}}`, `{{POSTING_TEXT}}`, `{{STEERING_HINTS_SECTION}}`, `{{SOURCE_DATA_JSON}}` |
-| `02-keywords-prompt.yaml` | curate-keywords | `{{PROJECT_TECHNOLOGIES}}`, `{{POSTING_TEXT}}`, `{{STEERING_HINTS_SECTION}}`, `{{REQUIREMENTS_MAP_ENTRIES}}`, `{{TARGET_COUNT}}` |
+| `02-keywords-prompt.yaml` | curate-keywords | `{{PROJECT_TECHNOLOGIES}}`, `{{SKILL_RATINGS_SECTION}}`, `{{POSTING_TEXT}}`, `{{STEERING_HINTS_SECTION}}`, `{{REQUIREMENTS_MAP_ENTRIES}}`, `{{TARGET_COUNT}}` |
 | `03-rank-projects-prompt.yaml` | rank-projects | `{{RANKING_JSON_SCHEMA}}`, `{{POSTING_TEXT}}`, `{{STEERING_HINTS_SECTION}}`, `{{PROJECTS_JSON}}`, `{{TARGET_COUNT}}`, `{{REQUIREMENTS_MAP_ENTRIES}}` |
 | `04-profile-hook-prompt.yaml` | generate-hook | `{{POSTING_TEXT}}`, `{{STEERING_HINTS_SECTION}}`, `{{PROFILE_DATA_JSON}}`, `{{REQUIREMENTS_MAP_ENTRIES}}`, `{{TARGET_LANGUAGE}}` |
 | `05-project-adaptation-prompt.yaml` | adapt-projects | `{{ADAPTATION_JSON_SCHEMA}}`, `{{POSTING_TEXT}}`, `{{STEERING_HINTS_SECTION}}`, `{{PROJECTS_JSON}}`, `{{REQUIREMENTS_MAP_ENTRIES}}`, `{{TARGET_LANGUAGE}}` |

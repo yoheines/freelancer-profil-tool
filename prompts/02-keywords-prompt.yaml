@@ -2,11 +2,12 @@
 # Das LLM wählt und priorisiert die relevantesten Technologie-Keywords.
 
 # Verfügbare Variablen:
-#   {{PROJECT_TECHNOLOGIES}} – Zeilenweise Liste aller Keyword-Kandidaten aus Projekten und profilbasierten Qualifikationen
-#   {{POSTING_TEXT}}         – Ausschreibungstext
+#   {{PROJECT_TECHNOLOGIES}}   – Zeilenweise Liste aller Keyword-Kandidaten aus Projekten und profilbasierten Qualifikationen
+#   {{SKILL_RATINGS_SECTION}}  – Optionaler Block mit Vertrautheits-Rating der Profil-Skills
+#   {{POSTING_TEXT}}           – Ausschreibungstext
 #   {{STEERING_HINTS_SECTION}} – Optionaler Block mit Steuerungshinweisen
 #   {{REQUIREMENTS_MAP_ENTRIES}} – Einträge aus der Requirements-Map
-#   {{TARGET_COUNT}}         – Maximale Anzahl Keywords
+#   {{TARGET_COUNT}}           – Maximale Anzahl Keywords
 
 system_prompt: |
   Du bist ein Experte für Freelancer-Profil-Optimierung.
@@ -24,6 +25,8 @@ system_prompt: |
   {{REQUIREMENTS_MAP_ENTRIES}}
 
   {{EVIDENZ_STRATEGIE}}
+
+  {{SKILL_RATINGS_SECTION}}
 
   Schritt-spezifische Ergänzung:
   - Antwort: jedes Keyword in eine neue Zeile (keine Kommas, kein JSON, kein Markdown, keine Erklärung).
