@@ -378,9 +378,11 @@ npx tsx src/cli/cli.ts pdf <run-id>
 
 Das HTML-Template liegt standardmäßig in `pdf-templates/profil-template.html` und verwendet **Handlebars** als Template-Engine – Schleifen, Bedingungen und Variablen werden direkt im HTML ausgewertet, kein TypeScript-Eingriff nötig.
 
-Die Anzahl Projekte und Keywords wird in der Config gesteuert – siehe `config/default.yaml`:
-- `pipeline.projectSelection.targetCount` (Projekte)
-- `pipeline.keywordSelection.targetCount` (Keywords)
+Wichtige Config-Werte in `config/default.yaml`:
+- `pipeline.projectSelection.targetCount` – Anzahl Projekte
+- `pipeline.keywordSelection.targetCount` – Anzahl Keywords
+- `pdf.templatePath` – Pfad zum HTML-Template
+- `pdf.appendPdfPath` – Optional: Pfad zu einem statischen PDF, das angehängt wird (z. B. vollständiger CV)
 
 #### Prompt-Vorlage: Template generieren/anpassen per LLM
 

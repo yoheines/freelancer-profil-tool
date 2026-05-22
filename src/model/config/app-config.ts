@@ -30,6 +30,8 @@ export interface KeywordSelectionConfig {
 
 export interface PdfConfig {
   templatePath: string;
+  /** Optionaler Pfad zu einem statischen PDF, das an das generierte Profil-PDF angehängt wird */
+  appendPdfPath?: string;
 }
 
 export interface LlmConfig {

@@ -6,7 +6,7 @@ export async function loadAppConfig(path: string = "./config/default.yaml"): Pro
   const raw = await parseYamlFile<{
     workspace?: { runsDir?: string; sourcesDir?: string };
     pipeline?: { projectSelection?: { targetCount?: number }; keywordSelection?: { targetCount?: number } };
-    pdf?: { templatePath?: string };
+    pdf?: { templatePath?: string; appendPdfPath?: string };
     llm?: { provider?: string; baseURL?: string; model?: string; maxTokens?: number; temperature?: number };
   }>(path);
 
@@ -28,6 +28,7 @@ export async function loadAppConfig(path: string = "./config/default.yaml"): Pro
 
   const pdf: PdfConfig = {
     templatePath: raw.pdf?.templatePath ?? "pdf-templates/profil-template.html",
+    appendPdfPath: raw.pdf?.appendPdfPath || undefined,
   };
 
   return {

@@ -207,6 +207,7 @@ npx tsx src/cli/cli.ts pdf <run-id>
 # config/default.yaml
 pdf:
   templatePath: "pdf-templates/profil-template.html"   # Pfad zum HTML-Template
+  appendPdfPath: "sources/anhang.pdf"                  # Optional: statisches PDF anhängen (z. B. CV)
 ```
 
 Das HTML-Template verwendet **Handlebars** als Template-Engine. Schleifen (`{{#each projects}}`) und Bedingungen (`{{#ifPositive certifications}}`) werden direkt im HTML ausgewertet – kein TypeScript-Code nötig für Layout-Änderungen. Für das Portrait-Bild muss `pdf-templates/assets/portrait.png` aktualisiert werden. Details zum Datenmodell und eine Prompt-Vorlage zum Generieren/Anpassen des Templates per LLM findest du in `docs/user-guide.md`.

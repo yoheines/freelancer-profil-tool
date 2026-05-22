@@ -18,7 +18,7 @@ export function createPdfCommand(): Command {
 
         const config = await loadAppConfig();
         const data = await extractPdfDataFromRun(runId);
-        const pdfPath = await writeProfilePdf(`./runs/${runId}`, data, config.pdf?.templatePath);
+        const pdfPath = await writeProfilePdf(`./runs/${runId}`, data, config.pdf?.templatePath, config.pdf?.appendPdfPath);
 
         console.log(`✅ PDF generated: ${pdfPath}`);
       } catch (err) {

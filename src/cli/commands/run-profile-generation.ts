@@ -77,7 +77,7 @@ export function createRunCommand(): Command {
             console.log(`\n📄 Generating PDF...`);
             try {
               const pdfData = await extractPdfDataFromRun(result.runId);
-              const pdfPath = await writeProfilePdf(`./runs/${result.runId}`, pdfData, config.pdf?.templatePath);
+              const pdfPath = await writeProfilePdf(`./runs/${result.runId}`, pdfData, config.pdf?.templatePath, config.pdf?.appendPdfPath);
               console.log(`  PDF: ${pdfPath}`);
             } catch (pdfErr) {
               const msg = pdfErr instanceof Error ? pdfErr.message : String(pdfErr);
