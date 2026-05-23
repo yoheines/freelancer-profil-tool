@@ -180,9 +180,38 @@ Leitlinie für `skills[].context` in Projekten:
 ## Test-Strategie
 
 - **Vitest** als Test-Runner
-- **Deterministische Schritte** haben Unit-Tests
+- **Deterministische Schritte** haben Unit-Tests (`src/**/*.test.ts`)
 - **LLM-Schritte** werden in Unit-Tests gemockt – E2E-Läufe mit echten API-Calls
+- **Integrationstests** in `tests/integration/` testen die CLI-Flows realistisch mit gemocktem LLM
+- **Optionaler E2E-Smoke-Test** in `tests/e2e/` nur gated über `RUN_E2E_LLM_TESTS=1`
 - Test-Fixtures in `tests/fixtures/` (Ausschreibungen, Profil, Projekte)
+
+### Integrationstests (`tests/integration/`)
+
+| Test | Beschreibung |
+|---|---|
+| `review-flow.test.ts` | Mockt LLM, führt `analyzeRequirementsCoverage()` mit echten Fixtures aus, rendert HTML und prüft Inhalte |
+| `run-pipeline.test.ts` | Mockt alle 5 LLM-Calls, führt `runProfilePipeline()` mit echten Fixtures aus, prüft `profile-draft.yaml` und `run-meta.yaml` |
+| `inspect-flow.test.ts` | Erzeugt künstliches Run-Verzeichnis mit `run-meta.yaml`, testet `renderInspectHtml()` auf korrekte Sektionen |
+| `pdf-flow.test.ts` | Extrahiert PDF-Daten aus künstlichem `profile-draft.yaml`; PDF-Render via Playwright als Smoke-Test (überspringt ohne Chromium) |
+
+### Optionaler E2E-Test (`tests/e2e/`)
+
+Ein E2E-Smoke-Test mit echtem LLM liegt in `tests/e2e/llm-smoke.test.ts`. Er wird **standardmässig übersprungen** und nur aktiviert mit:
+
+```bash
+RUN_E2E_LLM_TESTS=1 npm test
+# oder nur die E2E-Tests:
+RUN_E2E_LLM_TESTS=1 npx vitest run tests/e2e/
+```
+
+Der Test:
+- Führt `review` (1 LLM-Call) und `run` (5 LLM-Calls) mit echten Fixtures aus
+- Erfordert einen gültigen API-Key in `secrets/secrets.local.yaml` oder `OPENAI_API_KEY`
+- Prüft Exit-Code, Artefakt-Existenz und Grundstruktur der Ergebnisse
+- Hat grosszügige Timeouts (2–5 Minuten)
+
+**Hinweis:** Der E2E-Test macht echte LLM-Calls und verbraucht Tokens. In CI-Umgebungen oder ohne API-Key wird er sauber übersprungen.
 
 ## CLI
 
