@@ -1,14 +1,16 @@
-import { access, readFile } from "node:fs/promises";
+import { access, readFile, writeFile } from "node:fs/promises";
 import { Command } from "commander";
 import { loadAppConfig } from "../../adapters/config/load-app-config.js";
 import { loadSecretsConfig } from "../../adapters/config/load-secrets-config.js";
 import { loadSourceDocuments } from "../../adapters/filesystem/load-source-documents.js";
-import { ensureRunDir, writeGapAnalysis } from "../../adapters/filesystem/write-run-artifacts.js";
+import { ensureRunDir } from "../../adapters/filesystem/write-run-artifacts.js";
 import type { RunInputs } from "../../model/input/job-posting-input.js";
 import type { PipelineContext } from "../../core/pipeline/pipeline-context.js";
 import { parseCliOptions } from "../parsers/parse-cli-options.js";
-import { analyzeProfileGaps } from "../../core/pipeline/steps/analyze-profile-gaps.js";
+import { analyzeRequirementsCoverage } from "../../core/pipeline/steps/analyze-requirements-coverage.js";
 import { createRunId } from "../../shared/ids/create-run-id.js";
+import { renderReviewHtml, reviewHtmlPath } from "../presenters/render-review-html.js";
+import { summarizeRequirementsFit } from "../../shared/analysis/summarize-requirements-fit.js";
 
 export function createReviewCommand(): Command {
   return new Command("review")
@@ -63,32 +65,34 @@ export function createReviewCommand(): Command {
         }
         console.log(`  Model: ${config.llm.model} @ ${config.llm.baseURL}\n`);
 
-        const { gapAnalysis, tokensUsed } = await analyzeProfileGaps(
-          context,
-          postingRaw,
-          options.steering ?? [],
-          sources,
-        );
+         const { requirementsMap, tokensUsed } = await analyzeRequirementsCoverage(
+           context,
+           postingRaw,
+           options.steering ?? [],
+           sources,
+         );
 
-        await ensureRunDir(runDir);
-        const gapAnalysisPath = await writeGapAnalysis(runDir, gapAnalysis);
+         const fitSummary = summarizeRequirementsFit(requirementsMap.entries);
 
-        console.log(`✅ Review ${runId} completed successfully.\n`);
-        console.log(`  Gesamtbewertung: ${gapAnalysis.overallAssessment}`);
-        console.log(`  Findings: ${gapAnalysis.findings.length}`);
-        console.log(`  Tokens: ${tokensUsed.toLocaleString()}`);
-        console.log(`  Gap-Analyse: ${gapAnalysisPath}`);
+         await ensureRunDir(runDir);
+         const htmlPath = reviewHtmlPath(runId);
+         const html = renderReviewHtml({
+           runId,
+           postingPath: options.posting,
+           sourcePaths: options.sources,
+           steeringHints: options.steering ?? [],
+           requirementsMap: requirementsMap.entries,
+           fitSummary,
+           llmTokens: tokensUsed,
+         });
+         await writeFile(htmlPath, html, "utf-8");
 
-        if (gapAnalysis.findings.length > 0) {
-          console.log("\n  Wichtigste Hinweise:");
-          for (const finding of gapAnalysis.findings.slice(0, 5)) {
-            const gapTag = finding.gapPriority ? ` · Lücke: ${finding.gapPriority.toUpperCase()}` : "";
-            console.log(`  - [${finding.priority.toUpperCase()}${gapTag}] ${finding.requirement} (${finding.status})`);
-            console.log(`    ${finding.reasoning}`);
-            if (finding.suggestedEvidence) console.log(`    Hilfreiche Evidenz: ${finding.suggestedEvidence}`);
-            console.log(`    Zielort: ${finding.suggestedSourceLocation}`);
-          }
-        }
+         console.log(`✅ Review ${runId} completed successfully.\n`);
+         console.log(`  Gesamtbewertung: ${fitSummary.overallAssessment}`);
+         console.log(`  Anforderungen: ${fitSummary.total}`);
+         console.log(`  Kritische Lücken: ${fitSummary.criticalGaps}`);
+         console.log(`  Tokens: ${tokensUsed.toLocaleString()}`);
+         console.log(`  HTML-Report: ${htmlPath}`);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         console.error(`❌ Review failed: ${message}`);

@@ -30,6 +30,18 @@ export interface ProfileSkill {
   rating?: SkillRating;
 }
 
+/**
+ * Ein Skill in der Projekthistorie mit optionalem Kontext.
+ * Der Kontext dient als rohe Evidenz, aus der der LLM spaeter
+ * eine passende Formulierung ableiten kann.
+ */
+export interface ProjectSkill {
+  name: string;
+  context?: string;
+}
+
+export type ProjectSkillInput = string | ProjectSkill;
+
 export interface ProjectHistoryInput {
   /** List of past projects with descriptions */
   projects: ProjectEntry[];
@@ -39,7 +51,7 @@ export interface ProjectEntry {
   id: string;
   title: string;
   description: string;
-  skills?: string[];
+  skills?: ProjectSkillInput[];
   duration?: string;
 }
 

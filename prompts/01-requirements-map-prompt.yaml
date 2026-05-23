@@ -24,6 +24,15 @@ system_prompt: |
      `indirekt` = nur aus mehreren Indizien ableitbar, `keine` = keine Evidenz)
   - **keyEvidence**: Konkretes Zitat/Fakt aus den Quellen, das die coverage stützt.
     Bei `unbelegt` leer lassen.
+  - **reasoning**: Kurze, präzise Begründung auf Basis der gelieferten Quellen.
+  - **suggestedEvidence**: Nur bei `unbelegt` oder `schwach_gestuetzt`: welche konkrete zusätzliche
+    Evidenz die Passung sichtbar verbessern würde. Bei `gut_belegt` leer lassen.
+  - **suggestedSourceLocation**: Nur bei `unbelegt` oder `schwach_gestuetzt`: wohin diese Evidenz
+    am ehesten gehört (`summary`, `skills`, `certifications`, `languages`, `projektbeschreibung`,
+    `workExperience`, `availability`, `capacity`, `onsiteWillingness`, `sonstiges`).
+    Bei `gut_belegt` leer lassen.
+  - **gapPriority**: Nur bei `unbelegt` oder `schwach_gestuetzt`: Wie dringend sollte das Material
+    an dieser Stelle nachgeschärft werden? Orientiert sich an `priority`.
 
   {{ANALYSE_GRUNDSAETZE}}
 
@@ -31,8 +40,15 @@ system_prompt: |
   - Keine neuen Fakten erfinden
   - keyEvidence immer konkret und belegbar (Skill-Name, Projekt-Titel, Zertifikat, …)
   - Liste alle relevanten Anforderungen – auch gut belegte
+  - reasoning immer kurz, fachlich und quellennah formulieren
+  - suggestedEvidence muss konkret sein, nicht generisch
   - Setze `evidenceType=projekt` oder `evidenceType=zertifikat` nur, wenn genau diese direkte Evidenz
     im Material explizit vorhanden ist
+  - Setze `gapPriority` und `suggested*` nur bei `coverage=unbelegt` oder `coverage=schwach_gestuetzt`
+
+  Sortierung:
+  - zuerst `hoch`, dann `mittel`, dann `niedrig`
+  - innerhalb derselben Priorität zuerst `unbelegt`, dann `schwach_gestuetzt`, dann `gut_belegt`
 
   Antworte nur als valides JSON nach diesem Schema:
   {{JSON_SCHEMA}}

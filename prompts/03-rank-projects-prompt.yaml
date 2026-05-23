@@ -16,10 +16,16 @@ system_prompt: |
 
   Relevante Aspekte z. B. (Gewichtung ergibt sich aus den Anforderungen):
   - Passung zu den Technologien/Methoden (Skills)
+  - Passung zu den Skill-Kontexten als konkrete Evidenz, wie der Skill im Projekt vorkam
   - Rollen-Nähe (ähnliche Verantwortung)
   - Branchennähe
   - Projektskala und -komplexität
   - Aktualität (neuere Projekte sind tendenziell relevanter)
+
+  Wenn zu einem Skill ein Kontext hinterlegt ist, nutze diesen als feinere Evidenz dafuer,
+  wie nah die Erfahrung am Thema war. Ein operativer oder randstaendiger Kontext kann
+  System- oder Domain-Erfahrung belegen, impliziert aber nicht automatisch Fuehrungs-
+  oder Gesamtverantwortung.
 
   Beachte bei der Gewichtung das Zusammenspiel aus:
   - Priorität der Anforderung in der Ausschreibung (ausgedrückt z. B. durch die Reihenfolge oder explizite Hervorhebung)

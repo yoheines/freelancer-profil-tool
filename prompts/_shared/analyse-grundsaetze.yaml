@@ -1,10 +1,10 @@
 # Analyse-Grundsätze für Anforderungsextraktion und Coverage-Bewertung.
-# Gemeinsam genutzt von Requirements-Map (01) und Gap-Analyse (06).
+# Gemeinsam genutzt von Requirements- / Fit-Analyse und Review.
 # Wird via {{ANALYSE_GRUNDSAETZE}} in die Einzel-Prompts injiziert.
 
 system_prompt: |
   Coverage-Definitionen (siehe auch Evidenz-Strategie):
-    - gut_bevelt → klare, direkte Evidenz (projekt, zertifikat, profil_skill)
+    - gut_belegt → klare, direkte Evidenz (projekt, zertifikat, profil_skill)
     - schwach_gestuetzt → nur indirekt ableitbar (rolle, indirekt)
     - unbelegt → keine Evidenz in den Quellen
 

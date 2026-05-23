@@ -41,6 +41,5 @@ export interface RunDiagnostic {
   outputRefs: {
     draftPath: string;
     metaPath?: string;
-    gapAnalysisPath?: string;
   };
 }

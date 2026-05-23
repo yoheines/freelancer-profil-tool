@@ -6,7 +6,7 @@
  */
 
 import type { PipelineContext } from "../pipeline-context.js";
-import type { SourceDocument } from "../../../model/input/job-posting-input.js";
+import type { ProjectSkillInput, SourceDocument } from "../../../model/input/job-posting-input.js";
 import type { RequirementsMap } from "../../../model/coverage/requirements-map.js";
 import { createLlmClient } from "../../../adapters/llm/openai-compatible-client.js";
 import { buildRankProjectsPrompt } from "../../../adapters/llm/prompt-builder/rank-projects-prompt.js";
@@ -17,7 +17,7 @@ interface ProjectEntry {
   id: string;
   title: string;
   description: string;
-  skills?: string[];
+  skills?: ProjectSkillInput[];
   duration?: string;
   client?: string;
   industry?: string;

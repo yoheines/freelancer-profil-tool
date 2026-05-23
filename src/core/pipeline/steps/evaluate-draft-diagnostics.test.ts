@@ -24,7 +24,7 @@ function makeInput(overrides?: Partial<DiagnosticsInput>): DiagnosticsInput {
     llmCalls: 3,
     projectRankings: [],
     outputRefs: {
-      draftPath: "/tmp/draft.md",
+      draftPath: "/tmp/profile-draft.yaml",
     },
     ...overrides,
   };
@@ -74,28 +74,6 @@ describe("evaluateDraftDiagnostics", () => {
     expect(result.llmUsage.calls).toBe(3);
   });
 
-  it("should derive weaknesses and suggestions from gap analysis", () => {
-    const result = evaluateDraftDiagnostics(makeInput({
-      gapAnalysis: {
-        overallAssessment: "Luecken vorhanden",
-        findings: [
-          {
-            requirement: "A/B-Testing",
-            status: "unbelegt",
-            reasoning: "Keine klare Projektnennung.",
-            suggestedEvidence: "Projekt mit Testdesign ergaenzen.",
-            suggestedSourceLocation: "projektbeschreibung",
-            priority: "hoch",
-          },
-        ],
-      },
-    }));
-
-    expect(result.structuralWeaknesses).toHaveLength(1);
-    expect(result.refinementSuggestions).toHaveLength(1);
-    expect(result.refinementSuggestions?.[0].type).toBe("expand_project");
-  });
-
   it("should derive weaknesses and suggestions from requirements map during normal runs", () => {
     const result = evaluateDraftDiagnostics(makeInput({
       requirementsMap: {
@@ -106,6 +84,10 @@ describe("evaluateDraftDiagnostics", () => {
             coverage: "unbelegt",
             evidenceType: "keine",
             keyEvidence: "",
+            reasoning: "Keine klare Projektnennung.",
+            suggestedEvidence: "Projekt mit Testdesign ergaenzen.",
+            suggestedSourceLocation: "projektbeschreibung",
+            gapPriority: "hoch",
           },
           {
             requirement: "Stakeholder-Management",
@@ -113,6 +95,10 @@ describe("evaluateDraftDiagnostics", () => {
             coverage: "schwach_gestuetzt",
             evidenceType: "indirekt",
             keyEvidence: "Projekt X",
+            reasoning: "Nur indirekt aus der Rolle und den Projekttexten ableitbar.",
+            suggestedEvidence: "Abstimmung mit Fachbereich und Management expliziter machen.",
+            suggestedSourceLocation: "summary",
+            gapPriority: "mittel",
           },
         ],
       },
@@ -122,7 +108,7 @@ describe("evaluateDraftDiagnostics", () => {
     expect(result.structuralWeaknesses[0].type).toBe("unsupported_requirement");
     expect(result.structuralWeaknesses[1].type).toBe("schwach_gestuetzte_anforderung");
     expect(result.refinementSuggestions).toHaveLength(2);
-    expect(result.refinementSuggestions?.[0].type).toBe("add_source_data");
+    expect(result.refinementSuggestions?.[0].type).toBe("expand_project");
     expect(result.refinementSuggestions?.[1].type).toBe("provide_context");
   });
 });

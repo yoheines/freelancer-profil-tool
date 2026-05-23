@@ -144,6 +144,21 @@ export const intermediateModelSchema = z.object({
     coverage: z.enum(["gut_belegt", "schwach_gestuetzt", "unbelegt"]),
     evidenceType: z.enum(["projekt", "zertifikat", "profil_skill", "rolle", "indirekt", "keine"]),
     keyEvidence: z.string(),
+    reasoning: z.string().optional(),
+    suggestedEvidence: z.string().optional(),
+    suggestedSourceLocation: z.enum([
+      "summary",
+      "skills",
+      "certifications",
+      "languages",
+      "projektbeschreibung",
+      "workExperience",
+      "availability",
+      "capacity",
+      "onsiteWillingness",
+      "sonstiges",
+    ]).optional(),
+    gapPriority: z.enum(["hoch", "mittel", "niedrig"]).optional(),
   })).optional(),
   skillKeywords: z.array(z.string()).optional(),
   projectRankings: z.array(z.object({
@@ -152,29 +167,6 @@ export const intermediateModelSchema = z.object({
     title: z.string(),
     rationale: z.string(),
   })).optional(),
-  gapAnalysis: z.object({
-    overallAssessment: z.string(),
-    findings: z.array(z.object({
-      requirement: z.string(),
-      status: z.enum(["unbelegt", "schwach_gestuetzt", "gut_belegt"]),
-      reasoning: z.string(),
-      suggestedEvidence: z.string(),
-      suggestedSourceLocation: z.enum([
-        "summary",
-        "skills",
-        "certifications",
-        "languages",
-        "projektbeschreibung",
-        "workExperience",
-        "availability",
-        "capacity",
-        "onsiteWillingness",
-        "sonstiges",
-      ]),
-      priority: z.enum(["hoch", "mittel", "niedrig"]),
-      gapPriority: z.enum(["hoch", "mittel", "niedrig"]).optional(),
-    })),
-  }).optional(),
 });
 
 export type IntermediateModelType = z.infer<typeof intermediateModelSchema>;

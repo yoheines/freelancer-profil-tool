@@ -8,6 +8,10 @@ interface RawEntry {
   coverage?: string;
   evidenceType?: string;
   keyEvidence?: string;
+  reasoning?: string;
+  suggestedEvidence?: string;
+  suggestedSourceLocation?: string;
+  gapPriority?: string;
 }
 
 interface RawResponse {
@@ -32,6 +36,10 @@ export function normalizeRequirementsMap(raw: string): RequirementsMap {
     coverage: normalizeCoverage(entry.coverage),
     evidenceType: normalizeEvidenceType(entry.evidenceType, entry.coverage),
     keyEvidence: entry.keyEvidence ?? "",
+    reasoning: normalizeOptionalText(entry.reasoning),
+    suggestedEvidence: normalizeOptionalText(entry.suggestedEvidence),
+    suggestedSourceLocation: normalizeSuggestedSourceLocation(entry.suggestedSourceLocation),
+    gapPriority: normalizeGapPriority(entry.gapPriority, entry.coverage),
   }));
 
   return { entries };
@@ -40,6 +48,11 @@ export function normalizeRequirementsMap(raw: string): RequirementsMap {
 function normalizePriority(value: string | undefined): "hoch" | "mittel" | "niedrig" {
   if (value === "hoch" || value === "mittel") return value;
   return "niedrig";
+}
+
+function normalizeOptionalText(value: string | undefined): string | undefined {
+  const normalized = value?.trim();
+  return normalized ? normalized : undefined;
 }
 
 function normalizeCoverage(value: string | undefined): RequirementsMapEntry["coverage"] {
@@ -62,4 +75,39 @@ function normalizeEvidenceType(
     default:
       return coverage === "unbelegt" ? "keine" : "indirekt";
   }
+}
+
+function normalizeSuggestedSourceLocation(
+  value: string | undefined,
+): RequirementsMapEntry["suggestedSourceLocation"] {
+  switch (value) {
+    case "summary":
+    case "skills":
+    case "certifications":
+    case "languages":
+    case "projektbeschreibung":
+    case "workExperience":
+    case "availability":
+    case "capacity":
+    case "onsiteWillingness":
+    case "sonstiges":
+      return value;
+    default:
+      return undefined;
+  }
+}
+
+function normalizeGapPriority(
+  value: string | undefined,
+  coverage: string | undefined,
+): RequirementsMapEntry["gapPriority"] {
+  if (coverage === "gut_belegt") {
+    return undefined;
+  }
+
+  if (value === "hoch" || value === "mittel" || value === "niedrig") {
+    return value;
+  }
+
+  return undefined;
 }

@@ -47,5 +47,6 @@ async function loadRunData(runId: string): Promise<InspectData> {
     diagnostics,
     requirementsMap: meta.requirementsMap as RequirementsMapEntry[] | undefined,
     projectRankings: meta.projectRankings as InspectData["projectRankings"],
+    inputs: meta.inputs as InspectData["inputs"],
   };
 }

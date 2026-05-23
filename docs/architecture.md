@@ -2,9 +2,9 @@
 
 ## Überblick
 
-Das Freelancer Profil Tool generiert aus einer Ausschreibung (Job Posting) und vorhandenem Quellmaterial (Profil, Projekthistorie) einen massgeschneiderten Markdown-Profilentwurf. Die Verarbeitung erfolgt als schlanke Pipeline mit fünf LLM-Calls und mehreren deterministischen Zwischenschritten.
+Das Freelancer Profil Tool generiert aus einer Ausschreibung (Job Posting) und vorhandenem Quellmaterial (Profil, Projekthistorie) einen massgeschneiderten YAML-Profilentwurf. Optional können daraus zusätzlich ein PDF und ein HTML-Inspect-Report erzeugt werden. Die Verarbeitung erfolgt als schlanke Pipeline mit fünf LLM-Calls und mehreren deterministischen Zwischenschritten.
 
-Die Ausschreibung wird **direkt** an die relevanten LLM-Schritte übergeben. Eine kompakte Requirements-Map bewertet zusätzlich Priorität, Coverage und Evidenztyp der Anforderungen, zerlegt zusammengesetzte Anforderungen bei Bedarf in atomare Einträge und steuert danach Keyword-Kuration, Projekt-Ranking, Hook, Projektadaption und die Run-Diagnostics. Das Projekt-Ranking ist rein LLM-basiert: Der LLM bekommt alle Projekte + Ausschreibung und wählt die relevantesten Projekte bis zur konfigurierten Zielanzahl aus.
+Die Ausschreibung wird **direkt** an die relevanten LLM-Schritte übergeben. Eine kompakte Requirements-Map bewertet zusätzlich Priorität, Coverage und Evidenztyp der Anforderungen, zerlegt zusammengesetzte Anforderungen bei Bedarf in atomare Einträge und steuert danach Keyword-Kuration, Projekt-Ranking, Hook, Projektadaption und die Run-Diagnostics. Profil-Skill-Ratings wirken als weiches Gewichtungssignal; Projekt-Skill-Kontexte liefern zusätzliche Evidenz, wie ein Skill im jeweiligen Projekt tatsächlich vorkam. Das Projekt-Ranking ist rein LLM-basiert: Der LLM bekommt alle Projekte + Ausschreibung und wählt die relevantesten Projekte bis zur konfigurierten Zielanzahl aus.
 
 ---
 
@@ -17,6 +17,7 @@ graph TB
         CMD_RUN["commands/run-profile-generation.ts"]
         CMD_REVIEW["commands/review-profile-fit.ts"]
         CMD_INSPECT["commands/inspect-run.ts"]
+        CMD_PDF["commands/generate-profile-pdf.ts"]
     end
 
     subgraph CORE["src/core/ — Geschäftslogik"]
@@ -35,16 +36,19 @@ graph TB
         LLM["llm/ — OpenAI-kompatibler Client"]
         FILES["filesystem/ — YAML/Datei-I/O"]
         CONFIG["config/ — App & Secrets Config"]
+        PDF["pdf/ — HTML → Playwright → PDF"]
     end
 
     subgraph SHARED["src/shared/ — Hilfsfunktionen"]
         ERR["errors/app-error.ts"]
         IDS["ids/create-run-id.ts"]
+        SKILLS["skills/ — Skill-Normalisierung"]
     end
 
     CLI_MAIN --> CMD_RUN
     CLI_MAIN --> CMD_REVIEW
     CLI_MAIN --> CMD_INSPECT
+    CLI_MAIN --> CMD_PDF
     CMD_RUN --> PIPELINE
     CMD_REVIEW --> LLM
     CMD_REVIEW --> FILES
@@ -54,17 +58,19 @@ graph TB
     STEPS --> MODEL
     CMD_INSPECT --> FILES
     CMD_INSPECT --> MODEL
+    CMD_PDF --> PDF
+    CMD_PDF --> CONFIG
 ```
 
 ### Schichten
 
 | Schicht | Zweck | Enthält |
 |---|---|---|
-| `src/cli/` | CLI-Kommandozeilen-Einstieg | `run`-, `review`- und `inspect`-Befehle, Presenter |
+| `src/cli/` | CLI-Kommandozeilen-Einstieg | `run`-, `review`-, `inspect`- und `pdf`-Befehle, Presenter |
 | `src/core/` | Orchestrierung der Pipeline | Pipeline-Orchestrator + 10 Schritt-Dateien |
 | `src/model/` | Typsichere Datenmodelle | Composition, Draft, Diagnostics, Input, Schemas |
-| `src/adapters/` | Externe Abhängigkeiten | LLM-Client, Dateisystem, Config-Loader |
-| `src/shared/` | Allgemeine Helfer | Fehlerklassen, IDs, Text-Normalisierung |
+| `src/adapters/` | Externe Abhängigkeiten | LLM-Client, Dateisystem, Config-Loader, PDF-Rendering |
+| `src/shared/` | Allgemeine Helfer | Fehlerklassen, IDs, Text- und Skill-Normalisierung |
 
 ### Architekturregeln
 
@@ -72,7 +78,7 @@ graph TB
 - **Model ist frei von Imports aus Core/Cli/Adapters** – reine Typdefinitionen
 - **Jeder LLM-Call geht durch den zentralen `createLlmClient()`** – kein direkter SDK-Zugriff
 - **Secrets nie in Logs oder Artefakten** – getrennte Config (`secrets.local.yaml`)
-- **Rein LLM-basiertes Ranking:** Keine regelbasierte Evidenz-Kalkulation oder Reserve-Klassifikation. Der LLM rankt Projekte rein anhand ihrer Beschreibung, Skills und Metadaten.
+- **Rein LLM-basiertes Ranking:** Keine regelbasierte Evidenz-Kalkulation oder Reserve-Klassifikation. Der LLM rankt Projekte rein anhand ihrer Beschreibung, Skills, Skill-Kontexte und Metadaten.
 
 ---
 
@@ -96,11 +102,11 @@ flowchart TB
 
     G["7: adapt-projects 🧠<br/>> Projekte im Batch adaptieren<br/>> Nominalstil"]:::llm
 
-    H["8: compose-draft<br/>> Draft zusammensetzen"]:::det
+    H["8: compose-yaml<br/>> YAML-Draft zusammensetzen"]:::det
 
     I["9: evaluate-diagnostics<br/>> Metriken + Schwächen"]:::det
 
-    J["10: persist-artifacts<br/>> 4 Dateien schreiben"]:::det
+    J["10: persist-artifacts<br/>> 3 Kernartefakte schreiben"]:::det
 
     START --> L0 --> M --> C --> D --> R --> F --> G --> H --> I --> J
 
@@ -121,9 +127,9 @@ Legende: 🧠 = LLM-Call (blau) · Deterministische Schritte (violett)
 | 5 | rank-projects | LLM | 3 | Alle Projekte + Ausschreibung + Requirements-Map | Top N gerankt (rein LLM-basiert) |
 | 6 | generate-profile-hook | LLM | 4 | Ausschreibung + Quellen + Requirements-Map | Einleitungstext |
 | 7 | adapt-project-descriptions | LLM | 5 | Gerankte Projekte + Ausschreibung + Requirements-Map | Adaptierte Projekttexte |
-| 8 | compose-draft | deterministisch | – | Alle Sections | Markdown-Dokument |
-| 9 | evaluate-diagnostics | deterministisch | – | Draft + Metadaten | Diagnostics |
-| 10 | persist-artifacts | deterministisch | – | Alle Daten | profile-draft.yaml + .md + run-meta.yaml + llm-traces.yaml |
+| 8 | compose-yaml | deterministisch | – | Alle Sections | `profile-draft.yaml` als strukturiertes YAML |
+| 9 | evaluate-diagnostics | deterministisch | – | YAML-Draft + Metadaten | Diagnostics |
+| 10 | persist-artifacts | deterministisch | – | Alle Daten | `profile-draft.yaml`, `run-meta.yaml`, `llm-traces.yaml` |
 
 Hinweis: `adapt-project-descriptions` zählt als **ein** LLM-Call (Batch). Die Pipeline hat damit insgesamt **5 LLM-Calls**.
 
@@ -144,7 +150,7 @@ flowchart TB
     subgraph INPUTS["Eingabe-Dateien"]
         POSTING["ausschreibung.txt"]
         PROFILE["profil.yaml<br/>(Kontakt, Skills,<br/>Sprachen, Zertifikate,<br/>Verfügbarkeit, …)"]
-        PROJECTS["projekte.yaml<br/>(bis zu 19 Projekte<br/>mit Beschreibung, Skills)"]
+        PROJECTS["projekte.yaml<br/>(Projekte mit Beschreibung,<br/>Skills und optionalem Kontext)"]
     end
 
     subgraph META["Lauf-Metadaten (run-meta.yaml)"]
@@ -155,8 +161,9 @@ flowchart TB
     end
 
     subgraph OUTPUTS["Ausgabe-Dateien"]
-        DRAFT["profile-draft.md"]
         YAML["profile-draft.yaml"]
+        METAFILE["run-meta.yaml"]
+        TRACES["llm-traces.yaml"]
     end
 
     REQ -->|"curate-keywords"| KW
@@ -166,13 +173,15 @@ flowchart TB
     POSTING & PROJECTS -->|"rank-projects"| RANK
     REQ -->|"rank-projects"| RANK
 
-    COMP -->|"compose-draft"| DRAFT
-    REQ -->|"generate-hook / adapt-projects"| DRAFT
-    REQ -->|"diagnostics"| META
-    KW -->|"compose-draft"| DRAFT
-    RANK -->|"compose-draft"| DRAFT
+    COMP -->|"compose-yaml"| YAML
+    REQ -->|"generate-hook / adapt-projects"| YAML
+    REQ -->|"run-meta"| META
+    KW -->|"compose-yaml"| YAML
+    RANK -->|"compose-yaml"| YAML
 
-    COMP -->|"diagnostics"| META
+    COMP -->|"run-meta"| META
+    META --> METAFILE
+    POSTING & PROFILE & PROJECTS -->|"LLM-Calls"| TRACES
 ```
 
 ---
@@ -183,14 +192,10 @@ flowchart TB
 graph LR
     subgraph PROMPTS["src/adapters/llm/prompt-builder/"]
         SK["→ curate-skill-keywords.ts<br/>(Prompt inline im Step)"]
-        RMP["requirements-map-prompt.ts<br/>> Coverage-Map"]
+        RMP["requirements-map-prompt.ts<br/>> Coverage- und Fit-Analyse"]
         RKP["rank-projects-prompt.ts<br/>> Ranking-Kriterien"]
         HP["profile-hook-prompt.ts<br/>> Einleitung schreiben"]
         AP["project-adaptation-prompt.ts<br/>> Batch-Adaption<br/>> Nominalstil + Verbotsliste"]
-    end
-
-    subgraph GAP["review-CLI: src/cli/commands/review-profile-fit.ts"]
-        GP["profile-gap-analysis-prompt.ts<br/>> Gap-Analyse für Vorab-Review"]
     end
 
     subgraph NORMALIZER["src/adapters/llm/response-normalizers/"]
@@ -198,7 +203,6 @@ graph LR
         NPR["normalize-project-ranking.ts"]
         NH["normalize-profile-hook.ts"]
         NB["normalize-batch-project-adaptations.ts"]
-        NGA["normalize-profile-gap-analysis.ts"]
     end
 
     subgraph CLIENT["src/adapters/llm/"]
@@ -209,14 +213,14 @@ graph LR
     RKP -->|"Response"| NPR
     HP -->|"Response"| NH
     AP -->|"Response"| NB
-    GP -->|"Response"| NGA
 
     RMP --> OC
     RKP --> OC
     HP --> OC
     AP --> OC
-    GP --> OC
 ```
+
+Der `review`-Befehl nutzt dieselbe Requirements-/Fit-Analyse wie Schritt 1 des Hauptlaufs. Es gibt keinen separaten Gap-Analyse-Prompt mehr.
 
 ---
 
@@ -228,7 +232,8 @@ flowchart LR
     
     CLI --> RUN["run<br/>> Pipeline ausführen"]
     CLI --> REVIEW["review<br/>> Quellen vorab prüfen"]
-    CLI --> INSPECT["inspect &lt;run-id><br/>> Ergebnisse anzeigen"]
+    CLI --> INSPECT["inspect &lt;run-id><br/>> HTML-Inspect erzeugen"]
+    CLI --> PDFCMD["pdf &lt;run-id><br/>> PDF erzeugen"]
 
     RUN -->|"-p/--posting"| POST["Ausschreibung (.txt)"]
     RUN -->|"-s/--sources"| SRC["Quellen (YAML)<br/>> Profil + Projekte"]
@@ -242,6 +247,7 @@ flowchart LR
     REVIEW -->|"-c/--config"| CFG
 
     INSPECT -->|"Liest"| META["runs/&lt;run-id>/run-meta.yaml"]
+    PDFCMD -->|"Liest"| YAMLFILE["runs/&lt;run-id>/profile-draft.yaml"]
 ```
 
 ---
@@ -253,10 +259,12 @@ runs/
 ├── <run-id/>                  # Eindeutige Lauf-ID (z. B. 20260521-3810ca)
 │   ├── profile-draft.yaml     # Editierbares YAML-Profil (generiert + Stammdaten)
 │   ├── run-meta.yaml          # Pipeline-Metadaten + Diagnostics
-│   └── llm-traces.yaml        # Prompt/Response pro LLM-Call
+│   ├── llm-traces.yaml        # Prompt/Response pro LLM-Call
+│   ├── profile-draft.pdf      # Optional, nach --pdf oder pdf <run-id>
+│   └── inspect.html           # Optional, nach inspect <run-id>
 │
 ├── <review-run-id>/           # Review-Lauf (gleiches ID-Format)
-│   └── gap-analysis.yaml      # Vorab-Hinweise zu Lücken und Nachschärfungen
+│   └── review.html            # Browserlesbarer Preflight-Report
 ```
 
 ---
@@ -267,14 +275,15 @@ runs/
 src/
 ├── adapters/
 │   ├── config/                # App & Secrets Config laden
-│   ├── filesystem/            # Datei-I/O (YAML, Markdown)
+│   ├── filesystem/            # Datei-I/O (YAML, Run-Artefakte)
 │   ├── llm/
 │   │   ├── prompt-builder/    # 5 Prompt-Builder + 1 Inline (Keywords)
 │   │   ├── response-normalizers/  # 5 Normalizer
 │   │   └── openai-compatible-client.ts
+│   ├── pdf/                   # YAML → Handlebars → Playwright → PDF
 │   └── serialization/         # YAML-Parsing
 ├── cli/
-│   ├── commands/              # run, review, inspect
+│   ├── commands/              # run, review, inspect, pdf
 │   ├── parsers/               # CLI-Optionen parsen
 │   └── presenters/            # Ausgabe-Formatter
 ├── core/
@@ -293,5 +302,6 @@ src/
 └── shared/
     ├── errors/                # AppError-Hierarchie
     ├── ids/                   # Run-ID-Generator
+    ├── skills/                # Skill-Normalisierung / Prompt-Serialisierung
     └── text/                  # Text-Normalisierung
 ```

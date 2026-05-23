@@ -7,16 +7,17 @@
  */
 
 import type { PipelineContext } from "../pipeline-context.js";
-import type { ProfileSkill, SourceDocument } from "../../../model/input/job-posting-input.js";
+import type { ProfileSkill, ProjectSkillInput, SourceDocument } from "../../../model/input/job-posting-input.js";
 import type { RequirementsMap } from "../../../model/coverage/requirements-map.js";
 import { createLlmClient } from "../../../adapters/llm/openai-compatible-client.js";
 import { loadPromptTemplate, fillTemplate } from "../../../adapters/llm/prompt-builder/load-prompt-template.js";
 import { buildRequirementsMapEntries, buildSkillRatingsSection, buildSteeringHintsSection } from "../../../adapters/llm/prompt-builder/prompt-sections.js";
+import { normalizeSkillNames } from "../../../shared/skills/normalize-skill-names.js";
 import { trimMarkdownBlock } from "../../../shared/text/trim-markdown-block.js";
 
 interface ProjectEntry {
   id: string;
-  skills?: string[];
+  skills?: ProjectSkillInput[];
 }
 
 interface ProfileEntry {
@@ -39,11 +40,9 @@ export async function curateSkillKeywords(
     if (src.type !== "project-history") continue;
     const content = src.content as { projects?: ProjectEntry[] };
     for (const proj of content.projects ?? []) {
-      if (proj.skills) {
-        for (const tech of proj.skills) {
-          if (!isExcludedKeywordCandidate(tech) && allTechnologies.add(tech)) {
-            candidateKeywords.push(tech);
-          }
+      for (const tech of normalizeSkillNames(proj.skills)) {
+        if (!isExcludedKeywordCandidate(tech) && allTechnologies.add(tech)) {
+          candidateKeywords.push(tech);
         }
       }
     }

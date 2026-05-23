@@ -53,4 +53,24 @@ describe("buildRankProjectsPrompt", () => {
     expect(systemPrompt).toContain("Requirements-Map");
     expect(systemPrompt).toContain("Stakeholder-Management");
   });
+
+  it("should include structured project skill contexts in the prompt", () => {
+    const { userPrompt, systemPrompt } = buildRankProjectsPrompt([
+      {
+        id: "proj-1",
+        title: "Projekt 1",
+        description: "Beschreibung",
+        skills: [
+          {
+            name: "SAP IS-U",
+            context: "Operative Nutzung im Tagesgeschaeft bei Kundenanfragen; relevant als praktische Systemerfahrung.",
+          },
+        ],
+      },
+    ], "Ausschreibung Energie", [], 1);
+
+    expect(userPrompt).toContain('"name": "SAP IS-U"');
+    expect(userPrompt).toContain('"context": "Operative Nutzung im Tagesgeschaeft bei Kundenanfragen; relevant als praktische Systemerfahrung."');
+    expect(systemPrompt).toContain("Skill-Kontexten als konkrete Evidenz");
+  });
 });

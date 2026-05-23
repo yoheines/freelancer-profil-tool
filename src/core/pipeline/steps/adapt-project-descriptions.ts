@@ -1,7 +1,7 @@
 import type { PipelineContext } from "../pipeline-context.js";
 import type { ProfileCompositionDecision } from "../../../model/composition/profile-composition-decision.js";
 import type { DraftSection } from "../../../model/draft/profile-draft.js";
-import type { ProfileSkill, SourceDocument } from "../../../model/input/job-posting-input.js";
+import type { ProfileSkill, ProjectSkillInput, SourceDocument } from "../../../model/input/job-posting-input.js";
 import type { RequirementsMap } from "../../../model/coverage/requirements-map.js";
 import { buildBatchProjectAdaptationPrompt } from "../../../adapters/llm/prompt-builder/project-adaptation-prompt.js";
 import { normalizeBatchProjectAdaptations, type BatchAdaptation } from "../../../adapters/llm/response-normalizers/normalize-batch-project-adaptations.js";
@@ -12,7 +12,7 @@ interface ProjectEntry {
   id: string;
   title: string;
   description: string;
-  skills?: string[];
+  skills?: ProjectSkillInput[];
   duration?: string;
   client?: string;
   industry?: string;

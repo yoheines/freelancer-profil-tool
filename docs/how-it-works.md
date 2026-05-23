@@ -26,9 +26,10 @@ Ein Lauf basiert auf vier Eingabearten:
    - Verfügbarkeit
    - Auslastung
    - Onsite-Bereitschaft
+   - optionale Skill-Ratings als weiches Gewichtungssignal
 
- 3. **Projektquelle**  
-    Wiederverwendbare Projektliste mit einzelnen Referenzprojekten.
+  3. **Projektquelle**  
+    Wiederverwendbare Projektliste mit einzelnen Referenzprojekten, optional inklusive Skill-Kontexten als rohe Projektevidenz.
 
 4. **Optionale Steuerhinweise**  
    Zusätzliche Vorgaben für diesen einen Lauf, zum Beispiel Schwerpunktsetzungen oder gewünschte Positionierung.
@@ -44,9 +45,9 @@ Ziel dieses Schritts:
 - konkrete Hinweise bekommen, welche Evidenz die Passung deutlich verbessern würde
 - das Quellmaterial nachschärfen, **bevor** der eigentliche Profilentwurf erzeugt wird
 
-Der Review erzeugt keinen Profilentwurf, sondern eine `gap-analysis.yaml`.
+Der Review erzeugt keinen Profilentwurf, sondern einen browserlesbaren Vorab-Report `review.html`.
 
-Die Gap-Analyse verwendet dieselben Analyse-Grundsätze (Granularität, implizite Anforderungen, Coverage-Definitionen) wie der Requirements-Map-Schritt im Hauptlauf – definiert in `prompts/_shared/analyse-grundsaetze.yaml`.
+Der Review verwendet dieselben Analyse-Grundsätze (Granularität, implizite Anforderungen, Coverage-Definitionen) wie der Requirements-Map-Schritt im Hauptlauf – definiert in `prompts/_shared/analyse-grundsaetze.yaml`.
 
 ## Grundlogik des Laufs
 
@@ -100,9 +101,10 @@ Alle späteren Entscheidungen bauen auf diesen Daten auf. Wenn hier etwas fehlt 
 
 - Der LLM leitet alle relevanten Anforderungen aus der Ausschreibung ab – sowohl explizite als auch implizite (z. B. Change-Management bei Aufgabentiefe, Stakeholder-Management bei Schnittstellenbeschreibung).
 - Für jede Anforderung bewertet er Priorität, Coverage und den Typ der stärksten Evidenz im vorhandenen Material.
+- Profil-Skill-Ratings wirken dabei als weicher Kontext. Projekt-Skill-Kontexte liefern zusätzliche Evidenz dafür, wie nah ein Skill im Projekt tatsächlich vorkam.
 - Zusammengesetzte Anforderungen werden bei Bedarf in atomare Einzelanforderungen zerlegt, wenn ihre Teilaspekte unterschiedlich gut belegt sind.
 - Die Requirements-Map steuert danach die Gewichtung in Keyword-Kuration, Ranking, Hook, Projektadaption und Diagnostics.
-- Die Analyse-Grundsätze (Granularität, implizite Anforderungen) sind zentral in `prompts/_shared/analyse-grundsaetze.yaml` definiert und gelten auch für die Gap-Analyse im Review-Befehl.
+- Die Analyse-Grundsätze (Granularität, implizite Anforderungen) sind zentral in `prompts/_shared/analyse-grundsaetze.yaml` definiert und gelten auch für die Fit-Analyse im Review-Befehl.
 
 **Ausgabe dieses Schritts**
 
@@ -120,9 +122,10 @@ Alle späteren Entscheidungen bauen auf diesen Daten auf. Wenn hier etwas fehlt 
 
 **Verarbeitung**
 
-- Das System sammelt Skills, Zertifikate und Sprach-/Profilmerkmale aus Profil und Projekthistorie.
+- Das System sammelt Skill-Namen aus Profil und Projekthistorie sowie Sprachmerkmale aus dem Profil.
 - Der LLM priorisiert daraus die relevantesten Keywords für die konkrete Ausschreibung bis zur konfigurierten Zielanzahl.
 - Die Requirements-Map gibt vor, welche belegten Anforderungen besonders stark gewichtet werden sollen.
+- Profil-Skill-Ratings werden als zusätzliches Gewichtungssignal an den LLM gegeben.
 - Einfache Sprachangaben wie Deutsch werden nicht als Leitsignal-Keywords aufgenommen.
 
 **Ausgabe dieses Schritts**
@@ -184,6 +187,7 @@ Jede Kombination aus Priorität (`hoch`/`mittel`/`niedrig`) und Coverage steuert
 
 - Der LLM bekommt alle verfügbaren Projekte zusammen mit dem Ausschreibungstext.
 - Er bewertet die Projekte unmittelbar auf ihre Relevanz zur Ausschreibung und nutzt die Requirements-Map als priorisierten Zwischenvertrag.
+- Skill-Kontexte aus den Projekten können dabei als zusätzliche Evidenz einfließen, ohne automatisch hohe Verantwortung zu implizieren.
 - Er wählt die besten Projekte bis zur konfigurierten Zielanzahl.
 - Wenn gar keine Projekte vorliegen, bricht der Lauf mit einem Validierungsfehler ab.
 
@@ -226,6 +230,7 @@ Jede Kombination aus Priorität (`hoch`/`mittel`/`niedrig`) und Coverage steuert
 
 - Der LLM bearbeitet die ausgewählten Projekte in der festgelegten Reihenfolge.
 - Aus Ausschreibung, Projekttext und Requirements-Map leitet er ab, welche Aspekte hervorzuheben sind.
+- Skill-Kontexte dürfen dabei professionell verdichtet werden: operative oder randständige Hinweise können als Systemkenntnis, Domänennähe oder Prozessbezug formuliert werden, solange keine höhere Verantwortung erfunden wird.
 - Die Evidenz-Strategie (Coverage × Priorität) gibt vor, ob und wie stark eine Anforderung im Projekttext betont werden darf.
 - Alle Tatsachenangaben bleiben exakt erhalten – es werden keine Aufgaben, Technologien oder Ergebnisse hinzugefügt.
 - Die Einleitung aus Schritt 5 wird in den passenden Abschnitt eingefügt.
@@ -255,7 +260,7 @@ Jede Kombination aus Priorität (`hoch`/`mittel`/`niedrig`) und Coverage steuert
 
 **Ausgabe dieses Schritts**
 
-- vollständiger Markdown-Profilentwurf
+- vollständiger YAML-Profilentwurf (`profile-draft.yaml`)
 
 ### 8. Diagnoseinformationen berechnen
 
@@ -272,7 +277,7 @@ Jede Kombination aus Priorität (`hoch`/`mittel`/`niedrig`) und Coverage steuert
 
 **Ausgabe dieses Schritts**
 
-- strukturierte Diagnosedatei
+- strukturierte Diagnosedaten für `run-meta.yaml`
 
 ### 9. Ergebnisse speichern
 
@@ -285,13 +290,15 @@ Jede Kombination aus Priorität (`hoch`/`mittel`/`niedrig`) und Coverage steuert
 **Verarbeitung**
 
 - Das System legt einen neuen Lauf-Ordner an.
-- Dort werden alle Ergebnisse getrennt gespeichert.
+- Dort werden die Kernartefakte gespeichert; optionale Folgeartefakte wie PDF oder Inspect-HTML entstehen erst durch separate Befehle oder Flags.
 
 **Ausgabe dieses Schritts**
 
 - `profile-draft.yaml` (editierbares YAML, generierte Inhalte + Stammdaten)
 - `run-meta.yaml` (Pipeline-Metadaten + Diagnostics)
 - `llm-traces.yaml` (Prompt/Response-Traces)
+- optional `profile-draft.pdf` (nach `--pdf` oder `pdf <run-id>`)
+- optional `inspect.html` (nach `inspect <run-id>`)
 
 ## Welche Datei wofür da ist
 
@@ -312,6 +319,10 @@ Das editierbare YAML-Profil – generierte Inhalte (Summary, Skills, Projekttext
 ### `llm-traces.yaml`
 
 Die technischen Prompt-/Response-Traces. Diese Datei ist vor allem für tiefere Analyse und Debugging relevant.
+
+### `inspect.html`
+
+Der visuelle Review-Report für einen abgeschlossenen Lauf. Wird nicht automatisch geschrieben, sondern erst nach `inspect <run-id>` erzeugt. Enthält Projekt-Ranking, Requirements-Map, Diagnostics und Nachschärfungsvorschläge in einer browserlesbaren Form.
 
 ## Wichtige fachliche Grundsätze
 

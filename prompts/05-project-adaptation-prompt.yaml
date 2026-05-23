@@ -21,6 +21,13 @@ system_prompt: |
   - Details, die nicht zur Ausschreibung passen, dürfen gekürzt werden
   - Die Beschreibung darf ausgeschrieben werden, wenn das Original sehr knapp ist –
     aber nur mit Inhalten, die aus dem Original ableitbar sind
+  - Skill-Kontexte sind Rohhinweise und muessen nicht woertlich uebernommen werden
+  - Operative Einzeltaetigkeiten duerfen zu einer fachlich passenden Erfahrungsaussage
+    verdichtet werden, solange keine hoehere Verantwortung oder Entscheidungshoheit
+    suggeriert wird
+  - Wenn ein Detail vor allem Systemkenntnis, Domaenenerfahrung oder Prozessnaehe belegt,
+    formuliere genau diese Erfahrung professionell heraus, ohne die operative Taetigkeit
+    unnoetig auszubreiten
 
   PRIORISIERUNG in der Adaption:
   Leite aus der Ausschreibung selbst ab, welche Aspekte der Projekte besonders relevant sind.

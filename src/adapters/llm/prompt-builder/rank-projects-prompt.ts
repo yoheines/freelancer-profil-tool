@@ -5,7 +5,9 @@
 
 import { loadPromptTemplate, fillTemplate } from "./load-prompt-template.js";
 import type { RequirementsMap } from "../../../model/coverage/requirements-map.js";
+import type { ProjectSkillInput } from "../../../model/input/job-posting-input.js";
 import { buildRequirementsMapEntries, buildSteeringHintsSection } from "./prompt-sections.js";
+import { serializeProjectSkillsForPrompt } from "../../../shared/skills/normalize-skill-names.js";
 
 interface ProjectInput {
   id: string;
@@ -14,7 +16,7 @@ interface ProjectInput {
   client?: string;
   industry?: string;
   duration?: string;
-  skills?: string[];
+  skills?: ProjectSkillInput[];
 }
 
 export function buildRankProjectsPrompt(
@@ -33,7 +35,7 @@ export function buildRankProjectsPrompt(
       client: p.client,
       industry: p.industry,
       duration: p.duration,
-      skills: p.skills,
+      skills: serializeProjectSkillsForPrompt(p.skills),
       description: p.description,
     })),
     null,

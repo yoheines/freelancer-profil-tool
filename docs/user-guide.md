@@ -72,6 +72,11 @@ sources/
 
 ### 3.1 YAML-Struktur verstehen
 
+Bevor du die Beispiele übernimmst, ist die Trennung wichtig:
+
+- **Profil-Skills** in `profil.yaml` beschreiben dein übergreifendes Kompetenzprofil und können ein optionales `rating` tragen.
+- **Projekt-Skills** in `projekte.yaml` beschreiben, wie ein Skill im konkreten Projekt vorkam. Dafür ist ein freier `context` meist hilfreicher als ein Rating.
+
 **Profil (`profil.yaml`):**
 
 ```yaml
@@ -90,6 +95,7 @@ summary: >
 
 skills:
   - name: "Skill-Name"
+    rating: "high"              # Optional: high | medium | low
   - name: "Nächster Skill"
 
 certifications:
@@ -122,15 +128,33 @@ projects:
       Zwei bis vier Sätze: Was wurde gemacht, welche Rolle hattest du,
       welche Technologien kamen zum Einsatz, welches Ergebnis wurde erzielt?
     skills:
-      - "Scrum"
-      - "Kundenportal"
-      - "Stakeholder-Management"
+      - name: "Kundenportal"
+        context: "Fachliche Projektleitung und Product Ownership für Relaunch und Weiterentwicklung des Kundenportals."
+      - name: "Stakeholder-Management"
+        context: "Abstimmung mit Fachbereich, Kundenservice und Vertrieb; Priorisierung der Anforderungen über mehrere Beteiligte hinweg."
+      - "Scrum"                 # weiter erlaubt, aber weniger aussagekräftig
     duration: "01/2022–09/2022"
 ```
 
-Ein vollständiges Beispiel findest du in `tests/fixtures/profile-sources/example-profil.yaml` und `tests/fixtures/project-histories/example-projekte.yaml`.
+Ein vollständiges Beispiel findest du in `tests/fixtures/profile-sources/example-profil.yaml` und `tests/fixtures/project-histories/example-projekte.yaml`. Die Fixtures zeigen bewusst ein eher kompaktes Minimalformat; für produktive Projektdaten ist `skills[].context` meist die bessere Wahl.
 
-### 3.2 Konvertierungs-Prompt: PDF/DOCX → YAML
+### 3.2 Gute Skill-Kontexte für Projekte schreiben
+
+Der Projekt-Skill-`context` ist bewusst **keine** fertige Profilformulierung. Er darf roh, operativ und ehrlich sein. Das LLM nutzt ihn als Evidenz und formuliert daraus später eine professionell verdichtete Aussage.
+
+Gut geeignet sind Kontexte wie:
+
+- `"Operative Nutzung im Tagesgeschäft bei Kundenanfragen; relevant als praktische Systemkenntnis im energiewirtschaftlichen Kontext."`
+- `"Abstimmung mit Fachbereich, Kundenservice und externen Dienstleistern; keine disziplinarische Führung."`
+- `"Fachliche Mitgestaltung der Zielprozesse, aber keine eigene technische Implementierung."`
+
+Wichtig:
+
+- Verantwortung nicht künstlich erhöhen
+- Randständige Erfahrung als randständig markieren
+- Systemkenntnis, Domänennähe und Prozessbezug explizit machen, wenn sie relevant sind
+
+### 3.3 Konvertierungs-Prompt: PDF/DOCX → YAML
 
 Wenn dein Profil bereits als CV (PDF, DOCX, Text) vorliegt, verwende diesen Prompt mit einem LLM deiner Wahl (z. B. ChatGPT, Claude, Kimi), um es in das YAML-Format zu überführen:
 
@@ -163,6 +187,7 @@ summary: >
 
 skills:
   - name: "Skill 1"
+    rating: "high"  # optional
   - name: "Skill 2"
 
 certifications:
@@ -195,7 +220,8 @@ projects:
       2-4 Sätze: Beschreibung der Aufgabe, der Rolle, der Technologien/Methoden,
       des Ergebnisses. Keine Übertreibungen, nur Fakten aus dem CV.
     skills:
-      - "Verwendeter Skill / Technologie"
+      - name: "Verwendeter Skill / Technologie"
+        context: "Freie, ehrliche Rohbeschreibung, wie der Skill im Projekt vorkam. Darf auch operativ oder randständig formuliert sein."
     duration: "MM/JJJJ–MM/JJJJ"
 
 ---
@@ -229,7 +255,6 @@ Alle LLM-Prompts liegen als YAML-Dateien in `prompts/`. Du kannst sie an deinen 
 | `prompts/03-rank-projects-prompt.yaml` | Projekt-Ranking | Ranking-Kriterien |
 | `prompts/04-profile-hook-prompt.yaml` | Einleitung | Stilvorgaben, verbotene Wörter, Beispiele |
 | `prompts/05-project-adaptation-prompt.yaml` | Projekt-Adaption | Stilvorgaben (z. B. Nominalstil) |
-| `prompts/06-gap-analysis-prompt.yaml` | Vorab-Review | – |
 
 ### Shared-Strategien (zentrale Logik)
 
@@ -281,7 +306,7 @@ npx tsx src/cli/cli.ts review \
 - Jede Anforderung wird bewertet: Priorität (hoch/mittel/niedrig) × Coverage (gut\_belegt/schwach\_gestuetzt/unbelegt)
 - Für unbelegte oder schwach gestützte Anforderungen gibt es Verbesserungsvorschläge
 
-**Ausgabe:** `runs/<run-id>/gap-analysis.yaml`
+**Ausgabe:** `runs/<run-id>/review.html`
 
 **Ergebnis interpretieren:**
 
@@ -366,7 +391,7 @@ npx tsx src/cli/cli.ts run \
 
 ### 8.1 PDF-Generierung
 
-Zusätzlich zum Markdown-Entwurf kann ein PDF erzeugt werden.
+Zusätzlich zum YAML-Entwurf kann ein PDF erzeugt werden.
 
 ```bash
 # Direkt nach dem Pipeline-Lauf
@@ -479,24 +504,44 @@ Nach erfolgreichem Lauf liegen alle Ergebnisse in `runs/<run-id>/`:
 
 **Wofür:** Debugging und Optimierung der eigenen Prompts. Wenn die Ausgabe nicht deinen Erwartungen entspricht, findest du hier, was genau an das LLM gesendet wurde.
 
-### `gap-analysis.yaml` (nur nach `review`-Befehl)
+### `profile-draft.pdf` (optional)
 
-Die Gap-Analyse – nur verfügbar, wenn du zuvor `npx tsx src/cli/cli.ts review` ausgeführt hast.
+Wird nur erzeugt, wenn du `run --pdf` oder `pdf <run-id>` verwendest. Das PDF basiert auf `profile-draft.yaml` und dem Handlebars-Template in `pdf-templates/`.
+
+### `inspect.html` (optional)
+
+Wird nur erzeugt, wenn du `inspect <run-id>` ausführst. Dient als browserlesbarer Review-Report für Ranking, Requirements-Map und Diagnostics.
+
+### `review.html` (nur nach `review`-Befehl)
+
+Der browserlesbare Preflight-Report. Er zeigt die Requirements-Fit-Analyse inklusive Coverage, Begründung und konkreten Nachschärfungshinweisen.
 
 ---
 
-## 10. Ergebnisse inspizieren (CLI)
+## 10. Ergebnisse inspizieren (HTML)
 
-Das `inspect`-Kommando zeigt die wichtigsten Metadaten eines abgeschlossenen Laufs (aus `run-meta.yaml`):
+Das `inspect`-Kommando erzeugt eine selbstständige HTML-Seite aus `run-meta.yaml` und den Run-Diagnostics:
 
 ```bash
 npx tsx src/cli/cli.ts inspect 20260521-3810ca
 ```
 
-Es zeigt:
+Ergebnis:
+
+- `runs/<run-id>/inspect.html`
+
+Die HTML-Seite enthält u. a.:
+
+- Projekt-Ranking mit Begründungen
+- Requirements-Map mit Priorität, Coverage und Evidenztyp
+- Diagnostics, Schwächen und Nachschärfungsvorschläge direkt bei den betroffenen Anforderungen
 - Kompositionsmodi der Abschnitte
-- Diagnostics (Schwächen, Laufzeit)
-- Nachschärfungsbedarf
+
+Typischer Aufruf danach:
+
+```bash
+xdg-open runs/20260521-3810ca/inspect.html
+```
 
 ---
 
@@ -526,7 +571,7 @@ flowchart LR
 
 ```bash
 # 1. Profil und Projekte in sources/ ablegen
-#    (PDF-Konvertierung mit Prompt aus Abschnitt 3.2)
+#    (PDF-Konvertierung mit Prompt aus Abschnitt 3.3)
 
 # 2. Ausschreibungstext speichern
 cp ~/Downloads/product-owner.txt sources/ausschreibungen/
@@ -537,7 +582,7 @@ npx tsx src/cli/cli.ts review \
   -s sources/profil.yaml \
   -s sources/projekte.yaml
 
-# 4. (optional) Profil nachschärfen, basierend auf der gap-analysis.yaml
+# 4. (optional) Profil nachschärfen, basierend auf review.html
 
 # 5. Generierung
 npx tsx src/cli/cli.ts run \

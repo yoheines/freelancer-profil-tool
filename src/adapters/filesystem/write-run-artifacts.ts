@@ -2,8 +2,8 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { stringify } from "yaml";
 import type { ProfileYamlData } from "../../model/draft/profile-draft.js";
 import type { ProfileCompositionDecision } from "../../model/composition/profile-composition-decision.js";
+import type { RequirementsMapEntry } from "../../model/coverage/requirements-map.js";
 import type { RunDiagnostic } from "../../model/diagnostics/run-diagnostic.js";
-import type { ProfileGapAnalysis } from "../../model/review/profile-gap-analysis.js";
 
 export async function ensureRunDir(runDir: string): Promise<void> {
   await mkdir(runDir, { recursive: true });
@@ -32,13 +32,7 @@ export interface RunMetaInput {
     targetLanguage?: string;
   };
   compositionPlan: ProfileCompositionDecision;
-  requirementsMap?: Array<{
-    requirement: string;
-    priority: string;
-    coverage: string;
-    evidenceType: string;
-    keyEvidence: string;
-  }>;
+  requirementsMap?: RequirementsMapEntry[];
   skillKeywords?: string[];
   projectRankings?: Array<{
     rank: number;
@@ -46,7 +40,6 @@ export interface RunMetaInput {
     title: string;
     rationale: string;
   }>;
-  gapAnalysis?: ProfileGapAnalysis;
   diagnostics: RunDiagnostic;
 }
 
@@ -72,24 +65,9 @@ export async function writeRunMeta(
   if (data.projectRankings && data.projectRankings.length > 0) {
     runMeta.projectRankings = data.projectRankings;
   }
-  if (data.gapAnalysis) {
-    runMeta.gapAnalysis = data.gapAnalysis;
-  }
-
   runMeta.diagnostics = data.diagnostics;
 
   const path = `${runDir}/run-meta.yaml`;
   await writeFile(path, stringify(runMeta), "utf-8");
-  return path;
-}
-
-// ── gap-analysis.yaml (nur für review-Befehl) ─────────────────────────────
-
-export async function writeGapAnalysis(
-  runDir: string,
-  gapAnalysis: ProfileGapAnalysis,
-): Promise<string> {
-  const path = `${runDir}/gap-analysis.yaml`;
-  await writeFile(path, stringify(gapAnalysis), "utf-8");
   return path;
 }
